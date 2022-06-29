@@ -1,0 +1,74 @@
+
+//Apply java-library plugin to add support for Java Library
+apply plugin: 'java'
+
+//Apply war plugin
+apply plugin: 'war'
+
+//Apply Findbugs inspection plugin
+apply plugin: 'findbugs'
+
+//Apply Jacoco plugin
+apply plugin: 'jacoco'
+
+//apply plugin: 'com.bmuschko.tomcat'
+
+//In questa sezione sono dichiarati i repository da cui scaricare le dipendenze necessarie al progetto
+repositories {
+		jcenter()
+		mavenCentral()
+		mavenLocal()
+}
+
+// JDK version source compatibility
+sourceCompatibility = 1.8
+
+// project version
+//version = '1.0'
+
+// creazione del file war nella cartella build\libs, nella post compilazione di Jenkins viene deployato su Tomcat
+// War file name
+war.baseName = 'AsteOnLine'
+
+// Web directory, this overrides the default value "webapp"
+project.webAppDirName = 'WebContent'
+
+//Set source directory, istruisco gradle su dove trovare i file di produzione ed i file di test. Il sourceSets è una struttura di directory che contiene i sorgenti java. Il plugin java ne contiene 2 di default che sono main e test: è stato necessario riscriverli perchè uso la struttura Dynamic Web e non quella standard di un progetto gradle
+sourceSets {
+		//percorso file di produzione
+		main {
+			java {
+				srcDirs 'src'
+			}
+		}
+}
+
+dependencies {
+
+	 //dipendendenze librerie locali
+	 compile fileTree(dir: 'WebContent/WEB-INF/lib', include: ['*.jar'])
+	 
+	 //Import di tutte le librerie esterne necessarie
+	 compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.+'
+
+	 
+	 //Import MySql connector Java driver
+	 compile group: 'mysql', name: 'mysql-connector-java', version: '5.+'
+
+	 //Import delle librerie MQTT
+	 implementation group: 'org.eclipse.paho', name: 'org.eclipse.paho.client.mqttv3', version: '1.2.5'
+	 
+} 
+
+
+
+
+//setting del task Javadoc
+javadoc {
+	source = sourceSets.main.allJava
+	classpath = configurations.compile
+	failOnError = false
+}
+
+
+
