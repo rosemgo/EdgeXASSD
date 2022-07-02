@@ -97,15 +97,15 @@ public class SensorNodeMQTT extends SensorNode{
 					            	for(int i=0; i<sensors.size(); i++) {
 					            		
 					            		JSONObject jsonmsg2 = new JSONObject();
-								    	jsonmsg2.put("name", sensors.get(i).getName());
+					            		jsonmsg.put("nameNode", device); //nome del sensore appartenente al nodo sensore
+					            		jsonmsg2.put("nameSensor", sensors.get(i).getName());
 								    	jsonmsg2.put("type", sensors.get(i).getType()); 
 								    	jsonmsg2.put("value", sensors.get(i).measurement());
 						            	
 								    	jsonmsg.put("json", ("{" + device +" "+ idSensorNode + " : "+ jsonmsg2 + "}"));
 						            	
 						            	sampleClient.publish(responseTopic + uuid, jsonmsg.toString().getBytes(), 2, false);
-					            	}
-					            	
+					            	}					            	
 							    
 					                break;	
 					            }
@@ -114,8 +114,7 @@ public class SensorNodeMQTT extends SensorNode{
 							}
 		                	
 		                }
-	
-		               
+			               
 		               System.out.println("MESSAGGIO MODIFICATO: " + jsonmsg.toString());
 		               
 		               if(cmd!="json") { //nel caso arrivi il comando json ho già inviato la risposta
@@ -143,8 +142,7 @@ public class SensorNodeMQTT extends SensorNode{
 				long time1 = System.currentTimeMillis();		
 				long time2 = 0;
 				String resource = "json"; //la risorsa inviata come evento async è sempre json
-							
-				
+									
 				//ogni 5 secondi invio un PONG sul topic DataTopic. Dal lato di EdgeX c'è il dispositivo MQTT-custom-device che è iscritto come broker al topic DataTopic
 				while(true) {
 					

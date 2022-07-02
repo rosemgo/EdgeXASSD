@@ -9,7 +9,7 @@ public abstract class SensorNode extends Thread{
 	protected int idSensorNode; //id incrementale ed univoco, ogni sensore di uno specifico protocollo deve avere un id crescente
 	protected transient List<Sensor> sensors; ////SOSTITUIRE CON UN ARRAY DI SENSORI sensore: temperatura, umidità, velocità
 	protected String protocollo;
-	protected boolean exitThread;	
+	protected boolean exitThread;	//variabile boolena usata per fermare il thread in esecuzione sul nodo sesnore se non si vuole usare l'interrupt
 	
 	
 	public SensorNode() {}
