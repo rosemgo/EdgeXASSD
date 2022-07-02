@@ -2,6 +2,7 @@ package it.unisannio.rosariogoglia.model;
 
 import java.net.SocketException;
 import java.net.URISyntaxException;
+import java.util.Date;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,17 +15,12 @@ import it.unipr.netsec.mjcoap.coap.server.CoapResource;
 
 public class SensorNodeCOAP extends SensorNode{
 
-/*	public SensorNodeCOAP(String device, int id) {
-		this.device = device;
-		this.idSensorNode = id;
-	}	
-*/	
-	//COPIARE CLIENT COAP
+
 	
 	@Override
 	public void run() {
 		
-		
+		System.out.println("INIZIO RUN");
 		
 		//args.length > 0 ? args[0] : 
 		CoapURI resource_uri;
@@ -35,34 +31,56 @@ public class SensorNodeCOAP extends SensorNode{
 			int udp_port=5683;
 			CoapClient coap_client = new CoapClient(udp_port);
 			
-			//POTREI USARE UNA VARIABILE BOOLEANA DEL NODO SENSORE ED ESEGUIRE IL WHILE FINO A QUANDO QUESTA VARIABILE E' VERA. QUINDI INVECE DI USARE UN INTERRUPT, PER INTERROMPERE IL THREAD, POTREI SETTARE QUESTA VARIABILE A FALSE 
+			System.out.println("CONNESSO AL SERVER COAP: " + resource_uri + " " + coap_client.toString());
+			
+			//INVIO ASYNC EVENT				
+			
+			long time1 = System.currentTimeMillis();		
+			long time2 = 0;
+			//String resource = "json";
+			
 			while(true) {
 			
-				//ogni sensore associato al nodo sensore invia una misurazione
-				for(int i=0; i<this.sensors.size(); i++) {
-					
-					//CREO UN MESSAGGIO JSON PER OGNI SENSORE ED EFFETTUARE L'INVIO
-				    JSONObject jsonmsg = new JSONObject();
-			    	jsonmsg.put("nameNode", this.device); //nome del sensore appartenente al nodo sensore
-			    	jsonmsg.put("nameSensor", this.sensors.get(i).getName()); 
-			    	jsonmsg.put("type", this.sensors.get(i).getType()); 
-			    	jsonmsg.put("value", this.sensors.get(i).measurement());
-			  
+				time2 = System.currentTimeMillis();
 			    
-				    System.out.println("MESSAGGIO INVIATO: " + jsonmsg);
-					CoapResponse resp=coap_client.request(CoapRequestMethod.POST, resource_uri, CoapResource.FORMAT_TEXT_PLAIN_UTF8, jsonmsg.toString().getBytes());
+			    if(time2 - time1 > 10000) {
+					//ogni sensore associato al nodo sensore invia una misurazione
+					for(int i=0; i<this.sensors.size(); i++) {
+						
+						//CREARE UN MESSAGGIO JSON PER OGNI SENSORE ED EFFETTUARE L'INVIO
+						      		
+		            
+		            	JSONObject jsonmsg = new JSONObject();
+				    	jsonmsg.put("nameNode", this.device); //nome del sensore appartenente al nodo sensore
+				    	jsonmsg.put("nameSensor", this.sensors.get(i).getName()); 
+				    	jsonmsg.put("type", this.sensors.get(i).getType()); 
+				    	jsonmsg.put("value", this.sensors.get(i).measurement());
+				    	jsonmsg.put("data", new Date());
+				    				    	
+					    System.out.println("MESSAGGIO INVIATO: " + jsonmsg);
+						CoapResponse resp=coap_client.request(CoapRequestMethod.POST, resource_uri, CoapResource.FORMAT_TEXT_PLAIN_UTF8, jsonmsg.toString().getBytes());
 							
-					
-					if (resp!=null) 
-						System.out.println("Response: "+resp);
-					else  
-						System.out.println("Request failure");
-								
-				}
+					//	resp = coap_client.request(CoapRequestMethod.POST, resource_uri, 0, "751".getBytes());
+						
+						
+						if (resp!=null) 
+							System.out.println("Response: "+resp);
+						else  
+							System.out.println("Request failure");
+						
+						
+					}
+				
+					time1 = System.currentTimeMillis();
+			    }
 			
 			}
-		//	coap_client.halt();;
 			
+		//	coap_client.halt();
+
+		//	System.out.println("FINE DEL RUN");
+	
+	
 		
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block

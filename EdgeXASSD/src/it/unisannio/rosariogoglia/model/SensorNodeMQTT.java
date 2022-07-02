@@ -1,7 +1,7 @@
 package it.unisannio.rosariogoglia.model;
 
 
-import java.util.List;
+import java.util.Date;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -19,8 +19,7 @@ public class SensorNodeMQTT extends SensorNode{
 
 		
 	public void run(){
-			
-		
+				
 		
 			String broker = "tcp://192.168.204.133:1883"; 
 			String commandTopic = "command/"+ this.device +"/#"; //cambiare con CommandTopic   
@@ -41,11 +40,9 @@ public class SensorNodeMQTT extends SensorNode{
 		       
 				sampleClient.connect(connOpts);						
 				System.out.println("Connected");
-			      
+			     			
 				
-				
-				
-	//	while(!exitThread) { //VARIABILE BOLLEANA USATA PER PROTEGGERE IL THREAD, SETTARE QUESTA VARIABILE A FALSE QUANDO SI VUOLE UCCIDERE IL THREAD, OVVIAMENTE IL METODO RUN NN SARà INTERROTTO SUBITO COME CON UN INTERRUPT.  
+	//	while(!exitThread) { //VARIABILE BOLEANA USATA PER PROTEGGERE IL THREAD, SETTARE QUESTA VARIABILE A FALSE QUANDO SI VUOLE UCCIDERE IL THREAD, OVVIAMENTE IL METODO RUN NN SARà INTERROTTO SUBITO COME CON UN INTERRUPT.  
 			
 				sampleClient.setCallback(new MqttCallback() {
 			        
@@ -90,7 +87,7 @@ public class SensorNodeMQTT extends SensorNode{
 									jsonmsg.put("message", "Sono il Nodo Sensore "+device+" "+idSensorNode+"");
 								break;		
 								case "randnum": 
-									jsonmsg.put("randnum", 12.123);
+									jsonmsg.put("randnum", 12.123); //CAMBIARE CON FLOAT ED UN FOR CHE INVIA VALORI DI MISURAZIONE PER OGNI SENSORE
 					                break;
 					            case "json":{ //creo un messaggio json per ogni sensore ed invio la misurazione //SI PUò CAMBIARE
 					            								    	
@@ -102,11 +99,12 @@ public class SensorNodeMQTT extends SensorNode{
 								    	jsonmsg2.put("type", sensors.get(i).getType()); 
 								    	jsonmsg2.put("value", sensors.get(i).measurement());
 						            	
+								    	//RISPONDO CON UNA RISORSA json
 								    	jsonmsg.put("json", ("{" + device +" "+ idSensorNode + " : "+ jsonmsg2 + "}"));
 						            	
 						            	sampleClient.publish(responseTopic + uuid, jsonmsg.toString().getBytes(), 2, false);
-					            	}					            	
-							    
+					            	}
+					            								    
 					                break;	
 					            }
 							default:
@@ -114,7 +112,8 @@ public class SensorNodeMQTT extends SensorNode{
 							}
 		                	
 		                }
-			               
+	
+		               
 		               System.out.println("MESSAGGIO MODIFICATO: " + jsonmsg.toString());
 		               
 		               if(cmd!="json") { //nel caso arrivi il comando json ho già inviato la risposta
@@ -142,7 +141,8 @@ public class SensorNodeMQTT extends SensorNode{
 				long time1 = System.currentTimeMillis();		
 				long time2 = 0;
 				String resource = "json"; //la risorsa inviata come evento async è sempre json
-									
+							
+				
 				//ogni 5 secondi invio un PONG sul topic DataTopic. Dal lato di EdgeX c'è il dispositivo MQTT-custom-device che è iscritto come broker al topic DataTopic
 				while(true) {
 					
@@ -162,13 +162,14 @@ public class SensorNodeMQTT extends SensorNode{
 					    	jsonmsg.put("nameSensor", this.sensors.get(i).getName()); 
 					    	jsonmsg.put("type", this.sensors.get(i).getType()); 
 					    	jsonmsg.put("value", this.sensors.get(i).measurement());
+					    	jsonmsg.put("data", new Date());
 					    	
 					    	System.out.println("MESS: " + jsonmsg.toString());
 					    	System.out.println("DataTOpic: " + dataTopic + resource);
 					    	
 					    	//DataTopic --> incoming/data/mqtt1/resource aggiungere la resource da inviare
 					
-					    	//N.B. incoming/data/mqtt1/message mqtt1 è il nome del dispositivo interno ad edgeX
+					    	//N.B. incoming/data/mqtt1/json mqtt1 è il nome del dispositivo interno ad edgeX
 					    	sampleClient.publish(dataTopic + resource, jsonmsg.toString().getBytes() /*jsonmsg2.toString().getBytes()*/, 1, // QoS = 2
 					                false);
 					    	
@@ -180,7 +181,6 @@ public class SensorNodeMQTT extends SensorNode{
 				    	time1 = System.currentTimeMillis();
 				    	
 				    }
-					
 					
 				}	
 				
@@ -198,10 +198,6 @@ public class SensorNodeMQTT extends SensorNode{
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-				
-	
-	        
-		
 			
 	}
 		
