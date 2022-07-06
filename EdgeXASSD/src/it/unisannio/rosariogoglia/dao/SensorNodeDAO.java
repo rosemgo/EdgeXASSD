@@ -19,6 +19,7 @@ import it.unisannio.rosariogoglia.model.SensorHumidity;
 import it.unisannio.rosariogoglia.model.SensorNode;
 import it.unisannio.rosariogoglia.model.SensorNodeCOAP;
 import it.unisannio.rosariogoglia.model.SensorNodeMQTT;
+import it.unisannio.rosariogoglia.model.SensorNodeREST;
 import it.unisannio.rosariogoglia.model.SensorTemperature;
 
 public class SensorNodeDAO {
@@ -39,8 +40,7 @@ public class SensorNodeDAO {
 			pstmt = connection.prepareStatement(query);
 			logger.debug("Select Query: " + query);
 			rs = pstmt.executeQuery(query);
-			
-			
+						
 			while(rs.next()){
 				SensorNode sensorNode = null;
 				String protocollo = rs.getString("protocollo"); //seleziono la tipologia del sensore
@@ -50,8 +50,8 @@ public class SensorNodeDAO {
 				else if(protocollo.equals("COAP")) {
 					sensorNode = new SensorNodeCOAP();
 				} 
-				else{ //completare con altri protocolli usati dai nodi sensori
-					
+				else if(protocollo.equals("REST")){ //completare con altri protocolli usati dai nodi sensori
+					sensorNode = new SensorNodeREST();
 				}				
 				
 				sensorNode.setIdSensorNode(rs.getInt("idsensorNode"));
@@ -125,8 +125,9 @@ public class SensorNodeDAO {
 					sensorNode = new SensorNodeCOAP();
 					logger.debug("SENSORE COAP");
 				} 
-				else{ //completare con altri protocolli usati dai nodi sensori
-						
+				else if(protocollo.equals("REST")) { //completare con altri protocolli usati dai nodi sensori
+					sensorNode = new SensorNodeREST();
+					logger.debug("SENSORE REST");	
 				}				
 			
 				sensorNode.setIdSensorNode(rs.getInt("idsensorNode"));
