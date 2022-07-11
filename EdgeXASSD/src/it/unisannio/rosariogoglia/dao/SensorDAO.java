@@ -37,7 +37,7 @@ public class SensorDAO {
 			while(rs.next()){
 				Sensor sensor = null;
 				String type = rs.getString("type"); //seleziono la tipologia del sensore
-				if(type.equals("temp")) {
+				if(type.equals("temperature")) {
 					sensor = new SensorTemperature();
 					sensor.setIdSensor(rs.getInt("idsensor"));
 					sensor.setName(rs.getString("name"));
@@ -109,7 +109,7 @@ public class SensorDAO {
 			rs = pstmt.executeQuery();
 			if (rs.next()){
 				String type = rs.getString("type");
-				if(type.equals("temp")) {
+				if(type.equals("temperature")) {
 					sensor = new SensorTemperature();
 					sensor.setIdSensor(rs.getInt("idsensor"));
 					sensor.setName(rs.getString("name"));

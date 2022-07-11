@@ -228,6 +228,58 @@ public class SensorNodeDAO {
 	}
 	
 	
+	public Integer insertSensorNode(SensorNode sensorNode) {
+		logger.debug("in insertSensorNode");
+		Integer sensorNodeId = -1;
+		Connection connection = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = DatabaseUtil.getConnection();
+			connection.setAutoCommit(false);
+			String sql = "INSERT INTO sensornode(deviceName, protocollo) VALUES (?, ?)";
+			pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			pstmt.setString(1, sensorNode.getDevice());
+			pstmt.setString(2, sensorNode.getProtocollo());
+			logger.debug("Insert Query: " + pstmt.toString());
+			
+			int insertRow = pstmt.executeUpdate();
+					
+			if(insertRow != -1){
+				rs = pstmt.getGeneratedKeys();
+				if(rs.next()) {
+					sensorNodeId = rs.getInt(1);
+					logger.info("Inserimento nuovo Nodo Sensore (" + sensorNodeId + ")");
+					sensorNode.setIdSensorNode(sensorNodeId);
+				}
+	
+			}
+				
+			connection.commit();
+			
+			
+		} catch (Exception e) {
+			logger.debug("Inserimento Nodo Sensore non riuscito!!!");
+		}
+		finally {
+			if (connection!=null) {
+				try {
+					if(rs != null)
+						rs.close();
+						pstmt.close();
+						connection.setAutoCommit(true);
+						connection.close();
+				} catch (SQLException  e) {
+					e.printStackTrace();
+				}
+				logger.debug("Connection chiusa");
+			}
+		}			
+		
+		return sensorNodeId;
+		
+	}
 	
 	public Integer insertSensorNodeHasSensors(Integer idSensorNode, List<Integer> idSensors){
 		logger.debug("in insertSensorNodeHasSensors");
@@ -269,10 +321,8 @@ public class SensorNodeDAO {
 			}
 			
 		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		finally {

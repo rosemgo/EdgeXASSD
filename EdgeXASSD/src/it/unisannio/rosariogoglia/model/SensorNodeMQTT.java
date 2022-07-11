@@ -173,7 +173,9 @@ public class SensorNodeMQTT extends SensorNode{
 					    	sampleClient.publish(dataTopic + resource, jsonmsg.toString().getBytes() /*jsonmsg2.toString().getBytes()*/, 1, // QoS = 2
 					                false);
 					    	
-					    //	incoming/data/mqtt1/json
+					    	//POSSO ANCHE EVITARE DI MANDARE UN MESSAGGIO PER SENSORE, POSSO INVIARE UN MESSAGGIO UNICO CON TANTI OGGETTI json IN READINGS
+					    	//CREO UN jsonArray ed ogni volto aggiungo il singolo jsonmsg nel for. Poi fuori dal for invoco una sola volta il publish
+					    	
 					    	
 					    	System.out.println("INVIO MESSAGGIO DATA TOPIC MULTI MQTT1");
 				    	}
