@@ -5,18 +5,22 @@ import java.util.List;
 
 public abstract class SensorNode extends Thread{
 		
-	protected String device;
 	protected int idSensorNode; //id incrementale ed univoco, ogni sensore di uno specifico protocollo deve avere un id crescente
+	protected String device;
 	protected transient List<Sensor> sensors; ////SOSTITUIRE CON UN ARRAY DI SENSORI sensore: temperatura, umidità, velocità
-	protected String protocollo;
-	protected boolean exitThread;	//variabile boolena usata per fermare il thread in esecuzione sul nodo sesnore se non si vuole usare l'interrupt
+	protected Protocol protocollo;
+	protected boolean exitThread;	
 	
 	
 	public SensorNode() {}
 	
+	public SensorNode(int idSensorNode, String device) {
+		this.idSensorNode = idSensorNode;
+		this.device = device;		
+	}
 	
 	
-	public SensorNode(String device, int id, String protocollo/*, List<Sensor> sensors*/) {
+	public SensorNode(String device, int id, Protocol protocollo /*, List<Sensor> sensors*/) {
 		this.device = device;
 		this.idSensorNode = id;
 		this.protocollo = protocollo;
@@ -46,22 +50,25 @@ public abstract class SensorNode extends Thread{
 		this.sensors = sensor;
 	}
 	
-	public String getProtocollo() {
+	public Protocol getProtocollo() {
 		return protocollo;
 	}
 
-	public void setProtocollo(String protocollo) {
+	public void setProtocollo(Protocol protocollo) {
 		this.protocollo = protocollo;
 	}
 
 	public String toString() {
-		return (this.idSensorNode + " " + this.device + " " + this.protocollo);
+		return (this.idSensorNode + " " + this.device + " " + this.protocollo.getProtocol());
 	}
 	
-	public abstract void run();	
-	
+
 	public void stopThreadh() {
 		exitThread = true;
 	}
+
+	@Override
+	public abstract void run();
+
 
 }

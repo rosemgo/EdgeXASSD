@@ -13,6 +13,8 @@ import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 
+import it.unisannio.rosariogoglia.dao.ProtocolDAO;
+import it.unisannio.rosariogoglia.dao.SensorDAO;
 import it.unisannio.rosariogoglia.databaseUtil.DatabaseUtil;
 import it.unisannio.rosariogoglia.model.Sensor;
 import it.unisannio.rosariogoglia.model.SensorHumidity;
@@ -21,6 +23,7 @@ import it.unisannio.rosariogoglia.model.SensorNodeCOAP;
 import it.unisannio.rosariogoglia.model.SensorNodeMQTT;
 import it.unisannio.rosariogoglia.model.SensorNodeREST;
 import it.unisannio.rosariogoglia.model.SensorTemperature;
+import it.unisannio.rosariogoglia.model.Protocol;
 
 public class SensorNodeDAO {
 	
@@ -40,10 +43,16 @@ public class SensorNodeDAO {
 			pstmt = connection.prepareStatement(query);
 			logger.debug("Select Query: " + query);
 			rs = pstmt.executeQuery(query);
-						
+			
+			
 			while(rs.next()){
 				SensorNode sensorNode = null;
-				String protocollo = rs.getString("protocollo"); //seleziono la tipologia del sensore
+				
+				int idProtocollo = rs.getInt("protocol_idprotocollo"); //seleziono la tipologia di protocollo usato dal nodo sensore
+				ProtocolDAO pDao = new ProtocolDAO();
+				Protocol protocol = pDao.getProtocolById(idProtocollo);
+				String protocollo = protocol.getProtocol();
+				
 				if(protocollo.equals("MQTT")) {
 					sensorNode = new SensorNodeMQTT();
 				}
@@ -52,11 +61,12 @@ public class SensorNodeDAO {
 				} 
 				else if(protocollo.equals("REST")){ //completare con altri protocolli usati dai nodi sensori
 					sensorNode = new SensorNodeREST();
-				}				
+					logger.debug("SENSORE REST");	
+				}			
 				
 				sensorNode.setIdSensorNode(rs.getInt("idsensorNode"));
 				sensorNode.setDevice(rs.getString("deviceName"));
-				sensorNode.setProtocollo(rs.getString("protocollo"));
+				sensorNode.setProtocollo(protocol);
 				
 				System.out.println("PROVO LA SERIALIZZAZIONE");
 				Gson json = new Gson();
@@ -116,7 +126,13 @@ public class SensorNodeDAO {
 			logger.debug("Select Query: " + query);
 			rs = pstmt.executeQuery();
 			if (rs.next()){
-				String protocollo = rs.getString("protocollo"); //seleziono la tipologia del sensore
+								
+				int idProtocollo = rs.getInt("protocol_idprotocollo"); 
+				ProtocolDAO pDao = new ProtocolDAO();
+				Protocol protocol = pDao.getProtocolById(idProtocollo);
+				String protocollo = protocol.getProtocol(); 
+				
+				//seleziono la tipologia di protocollo usato dal nodo sensore
 				if(protocollo.equals("MQTT")) {
 					sensorNode = new SensorNodeMQTT();
 					logger.debug("SENSORE MQTT");
@@ -125,14 +141,14 @@ public class SensorNodeDAO {
 					sensorNode = new SensorNodeCOAP();
 					logger.debug("SENSORE COAP");
 				} 
-				else if(protocollo.equals("REST")) { //completare con altri protocolli usati dai nodi sensori
+				else if(protocollo.equals("REST")){ //completare con altri protocolli usati dai nodi sensori
 					sensorNode = new SensorNodeREST();
 					logger.debug("SENSORE REST");	
 				}				
 			
 				sensorNode.setIdSensorNode(rs.getInt("idsensorNode"));
 				sensorNode.setDevice(rs.getString("deviceName"));
-				sensorNode.setProtocollo(rs.getString("protocollo"));				
+				sensorNode.setProtocollo(protocol);				
 				sensorNode.setSensors(this.getSensorsBySensorNodeID(sensorNodeId)); //carico la lista di sensori associati al nodo
 			}
 			System.out.println("(" + sensorNode.getIdSensorNode() + ", " + sensorNode.getDevice() + ", " + sensorNode.getProtocollo() + ")");
@@ -170,7 +186,6 @@ public class SensorNodeDAO {
 	}
 	
 	
-	
 	public List<Sensor> getSensorsBySensorNodeID(int sensorNodeId){
 		
 		logger.debug("in getSensorsBySensorNodeID");
@@ -186,8 +201,7 @@ public class SensorNodeDAO {
 			pstmt.setInt(1, sensorNodeId);
 			logger.debug("Select Query: " + query);
 			rs = pstmt.executeQuery();
-			
-			
+						
 			while(rs.next()){
 				//carico il sensore associato al nodo, a partire dall'id
 				Sensor sensor = sDAO.getSensorById(rs.getInt("sensor_idsensor"));
@@ -226,8 +240,6 @@ public class SensorNodeDAO {
 		
 		
 	}
-	
-	
 	public Integer insertSensorNode(SensorNode sensorNode) {
 		logger.debug("in insertSensorNode");
 		Integer sensorNodeId = -1;
@@ -238,10 +250,10 @@ public class SensorNodeDAO {
 		try {
 			connection = DatabaseUtil.getConnection();
 			connection.setAutoCommit(false);
-			String sql = "INSERT INTO sensornode(deviceName, protocollo) VALUES (?, ?)";
+			String sql = "INSERT INTO sensornode(deviceName, protocol_idprotocol) VALUES (?, ?)";
 			pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 			pstmt.setString(1, sensorNode.getDevice());
-			pstmt.setString(2, sensorNode.getProtocollo());
+			pstmt.setInt(2, sensorNode.getProtocollo().getIdProtocol()); 
 			logger.debug("Insert Query: " + pstmt.toString());
 			
 			int insertRow = pstmt.executeUpdate();
@@ -321,8 +333,10 @@ public class SensorNodeDAO {
 			}
 			
 		} catch (ClassNotFoundException e1) {
+			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (IOException e1) {
+			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		finally {
@@ -344,6 +358,9 @@ public class SensorNodeDAO {
 		return insertRow;
 	}
 	
+	
+	
+		
 	
 	
 	
