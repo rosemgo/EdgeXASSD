@@ -19,45 +19,115 @@
     </head>
     <body class="cyan">
         <div class="container">
-            <div class="drop-down-list card">
-                <div class="center">
-                    <h5>Dependent Select Item</h5>
-                </div>
-                <div class="divider"></div>
-         		<form action="ServletAssociateSensorToNode" method="get">
-                    <div class="input-field">
-                        <select id="sensorNode" name="idNodoSensore">
-                            <option>Select Sensor Node</option>
-                        </select>
-                    </div>
-                    <div class="input-field">
-                        <select id="sensor1" name="idSensore1">
-                            <option>Select Sensor 1</option>
-                        </select>
-                    </div>
-                    <div class="input-field">
-                        <select id="sensor2" name="idSensore2">
-                            <option>Select Sensor 2</option>
-                        </select>
-                    </div>
-                    <div class="input-field">
-                        <select id="sensor3" name="idSensore3">
-                            <option>Select Sensor 3</option>
-                        </select>
-                    </div>
-                    <div class="center">
-                        <button class="btn" id="buttonSubmit">Submit</button>
-                    </div>
-                </form>
+           
+           
+           
+      <!--   INSERIRE VERSO SINISTRA IL FORM PER LA CREAZIONE DEL NODO SENSORE -->
+            
+            
+            
+	            <div class="drop-down-list card" style="float:left; ">  
+	            	<div class="center">
+	                    <h5>Create  Sensor Node</h5>
+	                </div>
+	            	<div class="divider"></div>
+	            	
+	            	<form action="ServletCreateSensorNode" method="get">
+	            		<div class="input-field">
+	            			<input id="nameSensorNode" type="text" size="50" maxlength="300" title="Insert Sensor Node name" placeholder="Insert Sensor Node name" value="" name="device" >
+	            		</div>
+						<div class="input-field">
+	                        <select id="protocol" name="idProtocol">
+	                            <option>Select Protocol</option>
+	                        </select>
+	                    </div>             	
+	            		<div class="center">
+	                        <button class="btn" id="buttonCreate">Create</button>
+	                    </div>
+	            	</form>
+	          			 
+	            
+	            
+	            </div>
+            
+            
+            
+            
+            
+	            <div class="drop-down-list card" style="float:right; ">
+	                <div class="center">
+	                    <h5>Dependent Select Item</h5>
+	                </div>
+	                <div class="divider"></div>
+	                
+	         		<form action="ServletAssociateSensorToNode" method="get">
+	                    <div class="input-field">
+	                        <select id="sensorNode" name="idNodoSensore">
+	                            <option>Select Sensor Node</option>
+	                        </select>
+	                    </div>
+	                    <div class="input-field">
+	                        <select id="sensor1" name="idSensore1">
+	                            <option>Select Sensor 1</option>
+	                        </select>
+	                    </div>
+	                    <div class="input-field">
+	                        <select id="sensor2" name="idSensore2">
+	                            <option>Select Sensor 2</option>
+	                        </select>
+	                    </div>
+	                    <div class="input-field">
+	                        <select id="sensor3" name="idSensore3">
+	                            <option>Select Sensor 3</option>
+	                        </select>
+	                    </div>
+	                    <div class="center">
+	                        <button class="btn" id="buttonSubmit">Submit</button>
+	                    </div>
+	                </form>
+	                
+	            </div>
+            
             </div>
-        </div>
+            
+            
+        <div style="clear:both;"></div>
+            
+        <div class="divider">DIVIDER</div>
+        
       
-	  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.js"></script>
+	  	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
         <script type="text/javascript">
             //MENU' DI SELEZIONE NODE SENSORE E 3 SENSORI
         	$(document).ready(function () {        		
                 
+        		$.ajax({
+                	url: "ServletAjaxProtocolList",
+                    method: "GET",
+                    data: {operation: 'protocolList'},
+                    success: function (data, textStatus, jqXHR) {
+  
+                    	console.log("Protocol List: " + data);
+                        let protocolList = $.parseJSON(data);
+                        console.log("protocolList: " + protocolList);
+                     
+                        $.each(protocolList, function (key, value) {	
+                    	  	console.log("value id: " + value.idProtocol );
+                        	console.log("value name: " + value.protocol);
+                            $('#protocol').append('<option value="' + value.idProtocol + '">' + value.protocol + '</option>')
+                        });
+                        $('select').formSelect();
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        $('#protocol').append('<option>Protocol Unavailable</option>');
+                    },
+                    cache: false
+                });
+        		
+        		
+        		
+        		
         		$.ajax({
                 	url: "ServletAjaxAssociateSensorToNode",
                     method: "GET",
@@ -194,6 +264,10 @@
                                   
                 });
                 
+             
+                
+                
+                
                 
                 /* APPUNTO DA RICORDARE come fare il parse con jsnon
 					$.ajax({
@@ -260,9 +334,43 @@
     				
                    
                 }); 
-         */               
+         */       
+         
+         			
+         		
                 
             });
+                
+    /*            
+            $(document).ready(function () {
+            	
+            	$.ajax({
+                	url: "ServletAjaxProtocolList",
+                    method: "GET",
+                    data: {operation: 'protocolList'},
+                    success: function (data, textStatus, jqXHR) {
+  
+                    	console.log("Protocol List: " + data);
+                        let protocolList = $.parseJSON(data);
+                        console.log("protocolList: " + protocolList);
+                     
+                        $.each(protocolList, function (key, value) {	
+                    	  	console.log("value id: " + value.idProtocol );
+                        	console.log("value name: " + value.protocol);
+                            $('#protocol').append('<option value="' + value.idProtocol + '">' + value.protocol + '</option>')
+                        });
+                        $('select').formSelect();
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        $('#protocol').append('<option>Protocol Unavailable</option>');
+                    },
+                    cache: false
+                });
+            	
+            	
+            });
+      
+    */  
       
       
       
