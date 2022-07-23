@@ -12,6 +12,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.MqttSecurityException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -59,10 +60,12 @@ public class SensorNodeMQTT extends SensorNode{
 		            	
 		            	System.out.println("Messaggio ricevuto: " + topic + ": " + new String(message.getPayload()) ); //converte il payload del messaggio in stringa     
 	
+		            	//con il multilevel topic, il topic parametro della funzione messageArrived è dato dalla stringa command/nome del device/richiesta(get o set)/uuid
+		            	//esempio: command/my-device/json/get/293d7a00-66e1-4374-ace0-07520103c95f
 		            	String[] words = topic.split("/");
-		            	String cmd = words[2];
-		                String method = words[3];
-		                String uuid = words[4];
+		            	String cmd = words[2]; //sarebbe quello presente nei case dello switch (ad esempio json)
+		                String method = words[3]; //get o set
+		                String uuid = words[4]; //uuid
 		                
 		                JSONObject jsonmsg = new JSONObject();
 		                
@@ -81,7 +84,7 @@ public class SensorNodeMQTT extends SensorNode{
 		                else {
 		                	switch (cmd) {
 								case "ping":
-									jsonmsg.put("ping", "PONG, time: " + System.currentTimeMillis());
+									jsonmsg.put("ping", "PONG, time: " + new Date());
 								break;
 								case "message":
 									jsonmsg.put("message", "Sono il Nodo Sensore "+device+" "+idSensorNode+"");
@@ -89,22 +92,26 @@ public class SensorNodeMQTT extends SensorNode{
 								case "randnum": 
 									jsonmsg.put("randnum", 12.123); //CAMBIARE CON FLOAT ED UN FOR CHE INVIA VALORI DI MISURAZIONE PER OGNI SENSORE
 					                break;
-					            case "json":{ //creo un messaggio json per ogni sensore ed invio la misurazione //SI PUò CAMBIARE
-					            								    	
+					            case "json":{ 
+					            	//creo un messaggio json per ogni sensore ed invio la misurazione //SI PUò CAMBIARE
+					          
+					            	JSONArray jsonArray = new JSONArray();	
+					            	
 					            	for(int i=0; i<sensors.size(); i++) {
-					            		
 					            		JSONObject jsonmsg2 = new JSONObject();
-					            		jsonmsg.put("nameNode", device); //nome del sensore appartenente al nodo sensore
-					            		jsonmsg2.put("nameSensor", sensors.get(i).getName());
+					            		jsonmsg2.put("nameNode", device); //nome del sensore appartenente al nodo sensore
+								    	jsonmsg2.put("nameSensor", sensors.get(i).getName()); 
 								    	jsonmsg2.put("type", sensors.get(i).getType()); 
 								    	jsonmsg2.put("value", sensors.get(i).measurement());
-						            	
-								    	//RISPONDO CON UNA RISORSA json
-								    	jsonmsg.put("json", ("{" + device +" "+ idSensorNode + " : "+ jsonmsg2 + "}"));
-						            	
-						            	sampleClient.publish(responseTopic + uuid, jsonmsg.toString().getBytes(), 2, false);
+								    	jsonmsg2.put("data", new Date());
+					            		
+					            		jsonArray.put(jsonmsg2);
 					            	}
-					            								    
+					            	
+					    //        	jsonmsg.put("json", ("{" + device +" "+ idSensorNode + " : "+ jsonmsg2 + "}"));
+					            	jsonmsg.put("json", jsonArray.toString());
+					            	
+					            	
 					                break;	
 					            }
 							default:
@@ -116,12 +123,11 @@ public class SensorNodeMQTT extends SensorNode{
 		               
 		               System.out.println("MESSAGGIO MODIFICATO: " + jsonmsg.toString());
 		               
-		               if(cmd!="json") { //nel caso arrivi il comando json ho già inviato la risposta
-		               
-			               //uuid è indicato dal device in edgeX che invia il comando 
-			               //sampleClient.publish("command/response/mqtt1/" + uuid, jsonmsg.toString().getBytes(), 2, false); // QoS = 2
-			               sampleClient.publish(responseTopic + uuid, jsonmsg.toString().getBytes(), 2, false); 
-			           }
+		             		               
+			           //uuid è indicato dal device in edgeX che invia il comando 
+			           //sampleClient.publish("command/response/mqtt1/" + uuid, jsonmsg.toString().getBytes(), 2, false); // QoS = 2
+			           sampleClient.publish(responseTopic + uuid, jsonmsg.toString().getBytes(), 2, false); 
+			           
 		            }
 		            
 		            @Override
@@ -150,10 +156,9 @@ public class SensorNodeMQTT extends SensorNode{
 							    
 				    if(time2 - time1 > 10000) {
 				    	
-				    	//differenziare le varie tipologie di sensori e fornire un intervallo valore idoneo
-				    	//if(this.type.equals("temp"))
-				    //	Double value = (Math.random()*(50)-10); //genera valori compresi tra 40 - 10 gradi
-				    	//System.out.println("value: " + value);
+				    	//Creo jsonArray, ad ogni aggiungo il singolo jsonmsg nell'array. 
+				    	//Poi fuori dal for invoco una sola volta il publish ed invio un solo messaggio che contiene le misurazioni di tutti i sensori associati al nodo
+				    	JSONArray jsonArray = new JSONArray();				    	
 				    	
 				    	for(int i=0; i<this.sensors.size(); i++) {
 		            					    	
@@ -166,21 +171,23 @@ public class SensorNodeMQTT extends SensorNode{
 					    	
 					    	System.out.println("MESS: " + jsonmsg.toString());
 					    	System.out.println("DataTOpic: " + dataTopic + resource);
-					    	
-					    	//DataTopic --> incoming/data/mqtt1/resource aggiungere la resource da inviare
-					
-					    	//N.B. incoming/data/mqtt1/json mqtt1 è il nome del dispositivo interno ad edgeX
-					    	sampleClient.publish(dataTopic + resource, jsonmsg.toString().getBytes() /*jsonmsg2.toString().getBytes()*/, 1, // QoS = 2
-					                false);
-					    	
-					    	//POSSO ANCHE EVITARE DI MANDARE UN MESSAGGIO PER SENSORE, POSSO INVIARE UN MESSAGGIO UNICO CON TANTI OGGETTI json IN READINGS
-					    	//CREO UN jsonArray ed ogni volto aggiungo il singolo jsonmsg nel for. Poi fuori dal for invoco una sola volta il publish
-					    	
-					    	
-					    	System.out.println("INVIO MESSAGGIO DATA TOPIC MULTI MQTT1");
+					    						    	
+					    	jsonArray.put(jsonmsg);			    	
+
+				    	}
+				    					    	
+				    	for(int i=0; i<jsonArray.length(); i++) {
+				    		JSONObject j = jsonArray.getJSONObject(i);
+				    		System.out.println("ELEMENTO " + i + " : "  + j.toString());
 				    	}
 				    	
-				    	time1 = System.currentTimeMillis();
+				    	//DataTopic --> incoming/data/mqtt1/resource aggiungere la resource da inviare
+				    	//N.B. incoming/data/mqtt1/json mqtt1 è il nome del dispositivo interno ad edgeX
+						sampleClient.publish(dataTopic + resource, jsonArray.toString().getBytes() , 1, // QoS = 2
+									                false);
+						System.out.println("INVIO MESSAGGIO DATA TOPIC MULTI");
+				    	
+						time1 = System.currentTimeMillis();
 				    	
 				    }
 					
