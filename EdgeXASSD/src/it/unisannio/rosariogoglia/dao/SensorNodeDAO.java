@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 
+import it.unisannio.rosariogoglia.dao.SensorNodeDAO;
 import it.unisannio.rosariogoglia.dao.ProtocolDAO;
 import it.unisannio.rosariogoglia.dao.SensorDAO;
 import it.unisannio.rosariogoglia.databaseUtil.DatabaseUtil;
@@ -25,10 +26,11 @@ import it.unisannio.rosariogoglia.model.SensorNodeREST;
 import it.unisannio.rosariogoglia.model.SensorTemperature;
 import it.unisannio.rosariogoglia.model.Protocol;
 
+
 public class SensorNodeDAO {
 	
 	
-	private static Logger logger = Logger.getLogger(SensorNodeDAO.class);
+	private static Logger logger = Logger.getLogger(SensorNodeDAO.class);	
 	
 	public List<SensorNode> getSensorsNode(){
 		
@@ -48,7 +50,7 @@ public class SensorNodeDAO {
 			while(rs.next()){
 				SensorNode sensorNode = null;
 				
-				int idProtocollo = rs.getInt("protocol_idprotocollo"); //seleziono la tipologia di protocollo usato dal nodo sensore
+				int idProtocollo = rs.getInt("protocol_idprotocol"); //seleziono la tipologia di protocollo usato dal nodo sensore
 				ProtocolDAO pDao = new ProtocolDAO();
 				Protocol protocol = pDao.getProtocolById(idProtocollo);
 				String protocollo = protocol.getProtocol();
@@ -73,8 +75,8 @@ public class SensorNodeDAO {
 	            System.out.println(json.toJson(sensorNode));
 				
 				listaSensorNode.add(sensorNode);
-				System.out.println("(" + sensorNode.getIdSensorNode() + ", " + sensorNode.getDevice() + ", " + sensorNode.getProtocollo() + ")");
-				logger.debug("(" + sensorNode.getIdSensorNode() + ", " + sensorNode.getDevice() + ", " + sensorNode.getProtocollo() + ")");
+				System.out.println("(" + sensorNode.getIdSensorNode() + ", " + sensorNode.getDevice() + ", " + sensorNode.getProtocollo().getProtocol() + ")");
+				logger.debug("(" + sensorNode.getIdSensorNode() + ", " + sensorNode.getDevice() + ", " + sensorNode.getProtocollo().getProtocol() + ")");
 			}
 			logger.debug("Caricati " + listaSensorNode.size() + " sensori");
 			
@@ -127,7 +129,7 @@ public class SensorNodeDAO {
 			rs = pstmt.executeQuery();
 			if (rs.next()){
 								
-				int idProtocollo = rs.getInt("protocol_idprotocollo"); 
+				int idProtocollo = rs.getInt("protocol_idprotocol"); 
 				ProtocolDAO pDao = new ProtocolDAO();
 				Protocol protocol = pDao.getProtocolById(idProtocollo);
 				String protocollo = protocol.getProtocol(); 
@@ -138,6 +140,8 @@ public class SensorNodeDAO {
 					logger.debug("SENSORE MQTT");
 				}
 				else if(protocollo.equals("COAP")) {
+					//caricare anche la porta
+					int port = rs.getInt("portServerCOAP");
 					sensorNode = new SensorNodeCOAP();
 					logger.debug("SENSORE COAP");
 				} 
@@ -149,7 +153,9 @@ public class SensorNodeDAO {
 				sensorNode.setIdSensorNode(rs.getInt("idsensorNode"));
 				sensorNode.setDevice(rs.getString("deviceName"));
 				sensorNode.setProtocollo(protocol);				
-				sensorNode.setSensors(this.getSensorsBySensorNodeID(sensorNodeId)); //carico la lista di sensori associati al nodo
+				
+				//NOTE BENE CARICO LA LISTA DI SENSORI ASSOCIATI AL NODO SENSORE				
+				sensorNode.setSensors(this.getSensorsBySensorNodeID(sensorNodeId)); 
 			}
 			System.out.println("(" + sensorNode.getIdSensorNode() + ", " + sensorNode.getDevice() + ", " + sensorNode.getProtocollo() + ")");
 			logger.debug("(" + sensorNode.getIdSensorNode() + ", " + sensorNode.getDevice() + ", " + sensorNode.getProtocollo() + ")");
@@ -186,6 +192,146 @@ public class SensorNodeDAO {
 	}
 	
 	
+	
+	public SensorNode getSensorNodeByNome(String sensorNodeName){
+			
+			logger.debug("in getSensorNodeByName");
+			SensorNode sensorNode = null;
+			Connection connection = null;
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			try {
+				
+				connection = DatabaseUtil.getConnection();
+				String query = "SELECT * FROM sensornode WHERE (deviceName = ?)" ;
+				pstmt = connection.prepareStatement(query);
+				pstmt.setString(1, sensorNodeName);
+				logger.debug("Select Query: " + query);
+				rs = pstmt.executeQuery();
+				if (rs.next()){
+									
+					int idProtocollo = rs.getInt("protocol_idprotocol"); 
+					ProtocolDAO pDao = new ProtocolDAO();
+					Protocol protocol = pDao.getProtocolById(idProtocollo);
+					String protocollo = protocol.getProtocol(); 
+					
+					//seleziono la tipologia di protocollo usato dal nodo sensore
+					if(protocollo.equals("MQTT")) {
+						sensorNode = new SensorNodeMQTT();
+						logger.debug("SENSORE MQTT");
+					}
+					else if(protocollo.equals("COAP")) {
+						sensorNode = new SensorNodeCOAP();
+						logger.debug("SENSORE COAP");
+					} 
+					else if(protocollo.equals("REST")){ //completare con altri protocolli usati dai nodi sensori
+						sensorNode = new SensorNodeREST();
+						logger.debug("SENSORE REST");	
+					}				
+				
+					sensorNode.setIdSensorNode(rs.getInt("idsensorNode"));
+					sensorNode.setDevice(rs.getString("deviceName"));
+					sensorNode.setProtocollo(protocol);				
+					
+					//NOTA BENE CARICO LA LISTA DI SENSORI ASSOCIATI AL NODO SENSORE				
+					sensorNode.setSensors(this.getSensorsBySensorNodeID(sensorNode.getIdSensorNode())); 
+				}
+				System.out.println("(" + sensorNode.getIdSensorNode() + ", " + sensorNode.getDevice() + ", " + sensorNode.getProtocollo() + ")");
+				logger.debug("(" + sensorNode.getIdSensorNode() + ", " + sensorNode.getDevice() + ", " + sensorNode.getProtocollo() + ")");
+	
+				
+			} catch (SQLException  e) {
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			finally{
+				try {
+					if(rs != null) {
+						rs.close();
+						}
+						
+					if(pstmt != null) {
+						pstmt.close();
+						}
+						
+					if(connection != null) {
+						connection.close();
+						}
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			return sensorNode;
+			
+		}
+	
+	/**
+	 * Verifica se esiste già un Nodo Sensore con lo stesso nome
+	 * 
+	 * @param sensorNodeName
+	 * @return sensorNodeExisting variabile booleana parti a true se il nodo sensore è già presente nel DB
+	 */
+	public boolean checkSensorNodeByNome(String sensorNodeName){
+		
+		logger.debug("in checkSensorNodeByName");
+		
+		boolean sensorNodeExisting = false; 
+		SensorNode sensorNode = null;
+		Connection connection = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			
+			connection = DatabaseUtil.getConnection();
+			String query = "SELECT * FROM sensornode WHERE (deviceName = ?)" ;
+			pstmt = connection.prepareStatement(query);
+			pstmt.setString(1, sensorNodeName);
+			logger.debug("Select Query: " + query);
+			rs = pstmt.executeQuery();
+			if (rs.next()){
+				sensorNodeExisting = true;		
+			}
+			logger.debug("Il nodo sensore esiste: " + sensorNodeExisting);
+
+			
+		} catch (SQLException  e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		finally{
+			try {
+				if(rs != null) {
+					rs.close();
+					}
+					
+				if(pstmt != null) {
+					pstmt.close();
+					}
+					
+				if(connection != null) {
+					connection.close();
+					}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return sensorNodeExisting;
+		
+	}
+	
+	
+	
 	public List<Sensor> getSensorsBySensorNodeID(int sensorNodeId){
 		
 		logger.debug("in getSensorsBySensorNodeID");
@@ -196,7 +342,9 @@ public class SensorNodeDAO {
 		ResultSet rs = null;
 		try {
 			connection = DatabaseUtil.getConnection();
-			String query = "SELECT * FROM sensornode_has_sensor WHERE (sensorNode_idsensorNode = ?)";
+			
+			String query = "SELECT * FROM sensor WHERE (sensornode_idsensorNode = ?)";
+			
 			pstmt = connection.prepareStatement(query);
 			pstmt.setInt(1, sensorNodeId);
 			logger.debug("Select Query: " + query);
@@ -204,7 +352,7 @@ public class SensorNodeDAO {
 						
 			while(rs.next()){
 				//carico il sensore associato al nodo, a partire dall'id
-				Sensor sensor = sDAO.getSensorById(rs.getInt("sensor_idsensor"));
+				Sensor sensor = sDAO.getSensorById(rs.getInt("idsensor"));
 				listaSensori.add(sensor);
 				logger.debug("(" + sensor.getIdSensor() + ", " + sensor.getName() + sensor.getType() + ")");
 			}
@@ -240,6 +388,7 @@ public class SensorNodeDAO {
 		
 		
 	}
+	
 	public Integer insertSensorNode(SensorNode sensorNode) {
 		logger.debug("in insertSensorNode");
 		Integer sensorNodeId = -1;
@@ -250,10 +399,21 @@ public class SensorNodeDAO {
 		try {
 			connection = DatabaseUtil.getConnection();
 			connection.setAutoCommit(false);
-			String sql = "INSERT INTO sensornode(deviceName, protocol_idprotocol) VALUES (?, ?)";
-			pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-			pstmt.setString(1, sensorNode.getDevice());
-			pstmt.setInt(2, sensorNode.getProtocollo().getIdProtocol()); 
+			
+			if(sensorNode instanceof SensorNodeCOAP) {
+				String sql = "INSERT INTO sensornode (deviceName, protocol_idprotocol, portServerCOAP) VALUES (?, ?, ?)";
+				pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+				pstmt.setString(1, sensorNode.getDevice());
+				pstmt.setInt(2, sensorNode.getProtocollo().getIdProtocol());				
+				pstmt.setInt(3, ((SensorNodeCOAP) sensorNode).getPort());
+			}			
+			else {
+				String sql = "INSERT INTO sensornode (deviceName, protocol_idprotocol) VALUES (?, ?)";
+				pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+				pstmt.setString(1, sensorNode.getDevice());
+				pstmt.setInt(2,sensorNode.getProtocollo().getIdProtocol());				
+			}
+						
 			logger.debug("Insert Query: " + pstmt.toString());
 			
 			int insertRow = pstmt.executeUpdate();
@@ -292,7 +452,82 @@ public class SensorNodeDAO {
 		return sensorNodeId;
 		
 	}
+
 	
+	// insertSensorNodeHasSensors(idNodoSensore, idSensors);
+	
+	public Integer updateSensorListBySensorNodeId(Integer idNodoSensore, List<Sensor> sensorList) {
+		logger.debug("in updateSensorListBySensorNodeId");
+		Integer insertRow = -1;
+		SensorDAO sDAO = new SensorDAO();
+		
+		for(int i=0; i<sensorList.size(); i++) {			
+			insertRow = insertRow + sDAO.updateSensor(sensorList.get(i), idNodoSensore); //associo ogni sensore al nodo sensore scelto
+		}			
+
+		return insertRow;
+				
+	}
+	
+	
+		/**
+		 * Metodo usato per ottenere il numero di porta, usato per la componente server di un nodo sensore COAP, più grande di quelli presenti.
+		 * @return numero di porta
+		 */
+		public Integer getMaxPortServerCOAP() {
+			logger.debug("in getMaxPortServerCOAP");
+			Integer port = -1;
+			
+			Connection connection = null;
+			PreparedStatement  pstmt = null;
+			try {
+				
+				connection = DatabaseUtil.getConnection();
+				connection.setAutoCommit(false);
+				
+				String sql = "SELECT MAX(portServerCOAP) as max_port FROM sensor;";
+		
+				pstmt = connection.prepareStatement(sql);
+				logger.debug("Query:" + pstmt.toString());
+				port = pstmt.executeUpdate();
+								
+				connection.commit();
+				logger.info("Max COAP port: " + port);
+		
+			}catch (SQLException  e1) {
+				e1.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			finally {
+				if (connection!=null) {
+					try {
+						pstmt.close();
+						connection.setAutoCommit(true);
+						connection.close();
+						logger.debug("Connection chiusa");
+					} catch (SQLException  e) {
+						
+						e.printStackTrace();
+					}
+				}
+			}
+			return port;
+		}
+		
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+/*	
 	public Integer insertSensorNodeHasSensors(Integer idSensorNode, List<Integer> idSensors){
 		logger.debug("in insertSensorNodeHasSensors");
 		Integer insertRow = -1;
@@ -358,10 +593,7 @@ public class SensorNodeDAO {
 		return insertRow;
 	}
 	
-	
-	
-		
-	
+*/
 	
 	
 	
