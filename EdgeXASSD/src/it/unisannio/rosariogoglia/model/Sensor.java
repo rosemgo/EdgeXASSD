@@ -1,10 +1,13 @@
 package it.unisannio.rosariogoglia.model;
 
+
 public abstract class Sensor {
 	
 	private int idSensor;
 	private String name;
 	private String type; //indica la tipologia del sensore: temperatura, umidità, velocità ecc.
+	private SensorNode sensorNode; //Nodo sensore a cui è associato lo specifico sensore
+	
 	
 	public Sensor() {}
 
@@ -39,6 +42,14 @@ public abstract class Sensor {
 		this.type = type;
 	}
 	
+	public SensorNode getSensorNode() {
+		return sensorNode;
+	}
+
+	public void setSensorNode(SensorNode sensorNode) {
+		this.sensorNode = sensorNode;
+	}
+
 	public abstract double measurement();	
 
 }
