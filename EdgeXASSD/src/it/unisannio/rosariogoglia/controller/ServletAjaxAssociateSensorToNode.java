@@ -47,7 +47,9 @@ public class ServletAjaxAssociateSensorToNode extends HttpServlet {
             //operation e id sono i campi della variabile data inviata dalla pagina jsp index nella funzione ajax
             String op = request.getParameter("operation");
             System.out.println("OPERATION: " + op);
-                        
+           
+            
+            
             if (op.equals("sensorNode")) {
             	System.out.println("IN SENSOR NODE");
                //List<SensorNodeSimply> snlist = snDAO.getSensorsNodeSimply();
@@ -63,13 +65,16 @@ public class ServletAjaxAssociateSensorToNode extends HttpServlet {
                response.getWriter().write(sensorNodeList);
             }
 
-            //non mi serve L'id del nodo sensore, tutti i sensori sono associabili al nodo sensore
+            
             if (op.equals("sensor1")) {
-              //int id = Integer.parseInt(request.getParameter("id"));
-              //List<Sensor> slist = snDAO.getSensorsBySensorNodeID(id);
-            	
+              
+            	int idSensorNode = Integer.parseInt(request.getParameter("idSensorNode"));
+            	System.out.println("IDSENSORNODE RICEVUTO: " + idSensorNode);
+         
             	System.out.println("IN SENSOR 1");
-            	List<Sensor> slist = sDAO.getSensors();
+            	
+            	//DEVO FORNIRE SOLO I SENSORI NON ANCORA ASSOCIATI AL NODO SENSORE SCELTO
+            	List<Sensor> slist = sDAO.getSensorMancantiByIdSensorNode(idSensorNode);
             	for(int i=0; i<slist.size(); i++) {
                 	System.out.println(slist.get(i).toString());
             	}
@@ -87,15 +92,16 @@ public class ServletAjaxAssociateSensorToNode extends HttpServlet {
             	
             	System.out.println("IN SENSOR 2");
             	
-            	//int id = Integer.parseInt(request.getParameter("id"));
-                //List<Sensor> slist = snDAO.getSensorsBySensorNodeID(id);
-                List<Sensor> slist = sDAO.getSensors();
+            	int idSensorNode = Integer.parseInt(request.getParameter("idSensorNode"));
+            	System.out.println("IDSENSORNODE RICEVUTO: " + idSensorNode);
+           
+            	//DEVO FORNIRE SOLO I SENSORI NON ANCORA ASSOCIATI AL NODO SENSORE SCELTO
+            	List<Sensor> slist = sDAO.getSensorMancantiByIdSensorNode(idSensorNode);
                 Gson json = new Gson();
                 String sensorList = json.toJson(slist);
                 response.setContentType("text/html");
                 response.getWriter().write(sensorList);
             }
-            
             
             
     //    }
@@ -111,8 +117,8 @@ public class ServletAjaxAssociateSensorToNode extends HttpServlet {
 		doGet(request, response);
 		
 		System.out.println("SONO IN POST");
-	
 		
+	
 	}
 
 }
