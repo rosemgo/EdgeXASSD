@@ -3,8 +3,9 @@ package it.unisannio.rosariogoglia.model;
 
 import java.util.List;
 
-public abstract class SensorNode extends Thread{
-		
+
+public abstract class SensorNode implements Runnable{
+	
 	protected int idSensorNode; //id incrementale ed univoco, ogni sensore di uno specifico protocollo deve avere un id crescente
 	protected String device;
 	protected transient List<Sensor> sensors; ////SOSTITUIRE CON UN ARRAY DI SENSORI sensore: temperatura, umidità, velocità
@@ -62,13 +63,11 @@ public abstract class SensorNode extends Thread{
 		return (this.idSensorNode + " " + this.device + " " + this.protocollo.getProtocol());
 	}
 	
-
 	public void stopThreadh() {
 		exitThread = true;
 	}
 
 	@Override
 	public abstract void run();
-
 
 }
