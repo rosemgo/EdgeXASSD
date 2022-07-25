@@ -4,6 +4,7 @@ import java.net.SocketException;
 import java.net.URISyntaxException;
 import java.util.Date;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,6 +17,7 @@ import it.unipr.netsec.mjcoap.coap.message.CoapResponseCode;
 import it.unipr.netsec.mjcoap.coap.provider.CoapURI;
 import it.unipr.netsec.mjcoap.coap.server.AbstractCoapServer;
 import it.unipr.netsec.mjcoap.coap.server.CoapResource;
+
 
 public class SensorNodeCOAP extends SensorNode{
 
@@ -66,30 +68,43 @@ public class SensorNodeCOAP extends SensorNode{
 					time2 = System.currentTimeMillis();
 				    
 				    if(time2 - time1 > 10000) {
-						//ogni sensore associato al nodo sensore invia una misurazione
-						for(int i=0; i<SensorNodeCOAP.this.sensors.size(); i++) {
-							
-							//CREARE UN MESSAGGIO JSON PER OGNI SENSORE ED EFFETTUARE L'INVIO
-							JSONObject jsonmsg = new JSONObject();
+						
+				    	//Creo jsonArray, ad ogni iterazione aggiungo il singolo jsonmsg nell'array. 
+				    	//Poi fuori dal for invoco una sola volta il publish ed invio un solo messaggio che contiene le misurazioni di tutti i sensori associati al nodo
+				    	JSONArray jsonArray = new JSONArray();				    	
+				    	
+				    	for(int i=0; i<SensorNodeCOAP.this.sensors.size(); i++) {
+		            					    	
+					    	JSONObject jsonmsg = new JSONObject();
 					    	jsonmsg.put("nameNode", SensorNodeCOAP.this.device); //nome del sensore appartenente al nodo sensore
 					    	jsonmsg.put("nameSensor", SensorNodeCOAP.this.sensors.get(i).getName()); 
 					    	jsonmsg.put("type", SensorNodeCOAP.this.sensors.get(i).getType()); 
 					    	jsonmsg.put("value", SensorNodeCOAP.this.sensors.get(i).measurement());
-					    	jsonmsg.put("data", new Date());
-					    				    	
-						    System.out.println("MESSAGGIO INVIATO: " + jsonmsg);
-							CoapResponse resp=coap_client.request(CoapRequestMethod.POST, resource_uri, CoapResource.FORMAT_TEXT_PLAIN_UTF8, jsonmsg.toString().getBytes());
+					    //  jsonmsg.put("data", new Date());
+					    	
+					    	System.out.println("MESS: " + jsonmsg.toString());
+					    						    						    	
+					    	jsonArray.put(jsonmsg);			    	
+
+				    	}
+				    	//separo la data in modo da non ripeterla per ogni sensore ma la inserisco nel messaggio una volta sola
+				    	JSONObject date = new JSONObject();
+				    	date.put("date", new Date());
+				    	jsonArray.put(date); //aggiungo la data solo una volta				    	
+				    	
+				    	for(int i=0; i<jsonArray.length(); i++) {
+				    		JSONObject j = jsonArray.getJSONObject(i);
+				    		System.out.println("ELEMENTO " + i + " : "  + j.toString());
+				    	}
+				    	
+				    	CoapResponse resp=coap_client.request(CoapRequestMethod.POST, resource_uri, CoapResource.FORMAT_TEXT_PLAIN_UTF8, jsonArray.toString().getBytes());
+						//resp = coap_client.request(CoapRequestMethod.POST, resource_uri, 0, "751".getBytes());
 								
-						//	resp = coap_client.request(CoapRequestMethod.POST, resource_uri, 0, "751".getBytes());
-							
-							
-							if (resp!=null) 
-								System.out.println("Response: "+resp);
-							else  
-								System.out.println("Request failure");
-							
-							
-						}
+								
+				    	if (resp!=null) 
+				    		System.out.println("Response: " + resp);
+						else  
+							System.out.println("Request failure");
 					
 						time1 = System.currentTimeMillis();
 				    }
@@ -151,30 +166,58 @@ public class SensorNodeCOAP extends SensorNode{
 						System.out.println("Payload "+req.getPayload());
 							
 							
-							if(req.getRequestUriPath().contains("json")) {
-								
-								JSONObject jsonmsg = new JSONObject();
-						    	try {
-									jsonmsg.put("nameNode", "PIPPO");
-									jsonmsg.put("nameSensor", "PLUTO");
-									jsonmsg.put("data", new Date());
-								} catch (JSONException e) {
-									e.printStackTrace();
-								}
+						if(req.getRequestUriPath().contains("json")) {
+							
+							try {	
+								//Creo jsonArray, ad ogni aggiungo il singolo jsonmsg nell'array. 
+						    	//Poi fuori dal for invoco una sola volta il publish ed invio un solo messaggio che contiene le misurazioni di tutti i sensori associati al nodo
+						    	JSONArray jsonArray = new JSONArray();				    	
 						    	
-						    	//CoapResponse resp = coap_client.request(CoapRequestMethod.POST, resource_uri, 0, "739".getBytes());
-												    	
-						    	CoapResponse resp = CoapMessageFactory.createResponse(req, CoapResponseCode._2_05_Content);
-								resp.setPayload(CoapResource.FORMAT_TEXT_PLAIN_UTF8, jsonmsg.toString().getBytes());
+						    	for(int i=0; i<SensorNodeCOAP.this.sensors.size(); i++) {
+				            					    	
+							    	JSONObject jsonmsg = new JSONObject();
+							    	
+									jsonmsg.put("nameNode", SensorNodeCOAP.this.device);
+									//nome del sensore appartenente al nodo sensore
+							    	jsonmsg.put("nameSensor", SensorNodeCOAP.this.sensors.get(i).getName()); 
+							    	jsonmsg.put("type", SensorNodeCOAP.this.sensors.get(i).getType()); 
+							    	jsonmsg.put("value", SensorNodeCOAP.this.sensors.get(i).measurement());
+							    //	jsonmsg.put("data", new Date());
+						    	
+							    	System.out.println("MESS: " + jsonmsg.toString());
+							    						    						    	
+							    	jsonArray.put(jsonmsg);			    	
+
+						    	}
+						    	//separo la data in modo da non ripeterla per ogni sensore ma la inserisco nel messaggio una volta sola
+						    	JSONObject date = new JSONObject();
+						    	date.put("date", new Date());
+						    	jsonArray.put(date); //aggiungo la data solo una volta	
+						    	
+					    		//STAMPO IL CONTENUTO DEL MESSAGGIO			    	
+						    	for(int i=0; i<jsonArray.length(); i++) {
+						    		JSONObject j = jsonArray.getJSONObject(i);
+						    		System.out.println("ELEMENTO " + i + " : "  + j.toString());
+						    	}					    	
+								
+							    //CoapResponse resp = coap_client.request(CoapRequestMethod.POST, resource_uri, 0, "739".getBytes());
+													    	
+							    CoapResponse resp = CoapMessageFactory.createResponse(req, CoapResponseCode._2_05_Content);
+								resp.setPayload(CoapResource.FORMAT_TEXT_PLAIN_UTF8, jsonArray.toString().getBytes());
 								respond(req,resp);
-								System.out.println("RISPOSTA: " + resp.getPayload().toString());
+								System.out.println("RISPOSTA SERVER COAP: " + resp.getPayload().toString());
 								System.out.println(resp.getRemoteSoAddress());
+							
+							} catch (JSONException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
 							}
-							else{
-								CoapResponse resp = CoapMessageFactory.createResponse(req,CoapResponseCode._2_05_Content);
-								resp.setPayload(CoapResource.FORMAT_TEXT_PLAIN_UTF8,"1".getBytes());
-								respond(req,resp);	
-							}
+						}
+						else{
+							CoapResponse resp = CoapMessageFactory.createResponse(req,CoapResponseCode._2_05_Content);
+							resp.setPayload(CoapResource.FORMAT_TEXT_PLAIN_UTF8,"1".getBytes());
+							respond(req,resp);	
+						}
 						
 					}
 				};

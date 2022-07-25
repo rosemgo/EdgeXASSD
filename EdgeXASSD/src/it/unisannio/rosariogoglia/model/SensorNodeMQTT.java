@@ -103,10 +103,15 @@ public class SensorNodeMQTT extends SensorNode{
 								    	jsonmsg2.put("nameSensor", sensors.get(i).getName()); 
 								    	jsonmsg2.put("type", sensors.get(i).getType()); 
 								    	jsonmsg2.put("value", sensors.get(i).measurement());
-								    	jsonmsg2.put("data", new Date());
+								    //	jsonmsg2.put("data", new Date());
 					            		
 					            		jsonArray.put(jsonmsg2);
 					            	}
+					            	
+					            	//separo la data in modo da non ripeterla per ogni sensore ma la inserisco nel messaggio una volta sola
+							    	JSONObject date = new JSONObject();
+							    	date.put("date", new Date());
+							    	jsonArray.put(date); //aggiungo la data solo una volta	
 					            	
 					    //        	jsonmsg.put("json", ("{" + device +" "+ idSensorNode + " : "+ jsonmsg2 + "}"));
 					            	jsonmsg.put("json", jsonArray.toString());
@@ -167,7 +172,7 @@ public class SensorNodeMQTT extends SensorNode{
 					    	jsonmsg.put("nameSensor", this.sensors.get(i).getName()); 
 					    	jsonmsg.put("type", this.sensors.get(i).getType()); 
 					    	jsonmsg.put("value", this.sensors.get(i).measurement());
-					    	jsonmsg.put("data", new Date());
+					    //	jsonmsg.put("data", new Date());
 					    	
 					    	System.out.println("MESS: " + jsonmsg.toString());
 					    	System.out.println("DataTOpic: " + dataTopic + resource);
@@ -175,7 +180,11 @@ public class SensorNodeMQTT extends SensorNode{
 					    	jsonArray.put(jsonmsg);			    	
 
 				    	}
-				    					    	
+				    	//separo la data in modo da non ripeterla per ogni sensore ma la inserisco nel messaggio una volta sola
+				    	JSONObject date = new JSONObject();
+				    	date.put("date", new Date());
+				    	jsonArray.put(date); //aggiungo la data solo una volta					    	
+				    	
 				    	for(int i=0; i<jsonArray.length(); i++) {
 				    		JSONObject j = jsonArray.getJSONObject(i);
 				    		System.out.println("ELEMENTO " + i + " : "  + j.toString());
