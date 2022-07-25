@@ -28,6 +28,8 @@ import it.unisannio.rosariogoglia.model.SensorNodeREST;
 import it.unisannio.rosariogoglia.model.Protocol;
 
 import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import it.unisannio.rosariogoglia.controller.ServletCreateSensorNode;
 import it.unisannio.rosariogoglia.dao.ProtocolDAO;
@@ -64,36 +66,55 @@ public class ServletCreateSensorNode extends HttpServlet {
 		
 		if(sensorNodeName.equals("")){
 			
-			messaggio = "Devi inserire un nome valido!";
+			//messaggio = "Devi inserire un nome valido!";
+			
+			String result = "{\"result\":false,\"messaggio\":\"Devi inserire un nome valido!\",\"redirect\":true,\"redirect_url\":\"dashboard.jsp\"}";
+			JSONObject m = null;
+			try {
+				 m = new JSONObject(result);
+				System.out.println("mess: " +m.toString());
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
 			response.setContentType("text/plain");
-	        response.setCharacterEncoding("UTF-8");
-	        response.getWriter().write(messaggio);
+			response.setCharacterEncoding("UTF-8");
+			response.getWriter().write(m.toString());
+		
 			
 		}else if(sensorNodeProtocol==null) {
 			
-			messaggio = "Devi scegliere un protocollo di comunicazione!";
+		//	messaggio = "Devi scegliere un protocollo di comunicazione!";
+			String result = "{\"result\":false,\"messaggio\":\"Devi scegliere un protocollo di comunicazione!\",\"redirect\":true,\"redirect_url\":\"dashboard.jsp\"}";
+			JSONObject m = null;
+			try {
+				 m = new JSONObject(result);
+				System.out.println("mess: " +m.toString());
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
 			response.setContentType("text/plain");
-	        response.setCharacterEncoding("UTF-8");
-	        response.getWriter().write(messaggio);
+			response.setCharacterEncoding("UTF-8");
+			response.getWriter().write(m.toString());
 		
 		}
 		else if(snDAO.checkSensorNodeByNome(sensorNodeName)){ //VERIFICARE SE ESISTE GIà UN DEVICE CON LO STESSO NOME
-			messaggio = "Già esiste un nodo sensore con lo stesso nome!";
+		    //messaggio = "Già esiste un nodo sensore con lo stesso nome!";
+			String result = "{\"result\":false,\"messaggio\":\"Già esiste un nodo sensore con lo stesso nome!\",\"redirect\":true,\"redirect_url\":\"dashboard.jsp\"}";
+			JSONObject m = null;
+			try {
+				 m = new JSONObject(result);
+				System.out.println("mess: " +m.toString());
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
 			response.setContentType("text/plain");
-	        response.setCharacterEncoding("UTF-8");
-	        response.getWriter().write(messaggio);
+			response.setCharacterEncoding("UTF-8");
+			response.getWriter().write(m.toString());
 		}
 		else {
 			
 		//	SensorNodeDAO snDAO = new SensorNodeDAO();
 		//	ProtocolDAO pDAO = new ProtocolDAO();
-			
-
-		//CREARE UN METODO DAO IN SENSORNODE CHE FORNISCE IL NUMERO DI PORTA PIù GRANDE PRESENTE NEL DB
-		// SE NON C'è NESSUN NODO COAP INIZIARE CON UN NUMERO FISSO
-			
-
-			
 			Protocol protocol = pDAO.getProtocolById(sensorNodeProtocol);
 			
 			SensorNode sensorNode = null;
@@ -105,7 +126,7 @@ public class ServletCreateSensorNode extends HttpServlet {
 				//PASSARE LA PORTA DELLA COMPONENTE SERVER SEMPRE CRESCENTE, AD OGNI NODO CHE HA IL PROTOCOLLO COAP
 				Integer maxPort = snDAO.getMaxPortServerCOAP(); //ottengo il valore di porta più grande associato all'ultimo nodo sensore COAP inserito nel DB
 				Integer port;
-				if(maxPort == null)
+				if(maxPort == -1)
 					port = 45000;
 				else				
 					port = maxPort + 1; //creiamo una porta di uno più grande della massima presente 
@@ -116,9 +137,7 @@ public class ServletCreateSensorNode extends HttpServlet {
 			}	
 			
 			sensorNode.setDevice(sensorNodeName);
-			sensorNode.setProtocollo(protocol);
-			
-			
+			sensorNode.setProtocollo(protocol); 
 			int idSensorNode = -1;
 			//SCRIVERE NEL DATABASE I DATI DEL NODO SENSORE CREATO
 			idSensorNode = snDAO.insertSensorNode(sensorNode);
@@ -130,12 +149,12 @@ public class ServletCreateSensorNode extends HttpServlet {
 				String deviceEdgeX = "";
 			
 				//DIFFERENZIARE LE STRINGHE DA CREARE IN BASE AL TIPO DI PROTOCOLLO SCELTO
-				//IL NOME SCELTO DALL'UTENTE SARà IL DEVICENAME NEL DATABASE ED IN EDGEX
+				//IL NOME SCELTO DALL'UTENTE SARà IL DEVICENAME NEL DATABASE E IN EDGEX
 				
 				if(sensorNode.getProtocollo().getProtocol().equals("MQTT")) {
-					deviceEdgeX = "[{\"apiVersion\": \"v2\",\"device\": {\"name\": \""+ sensorNode.getDevice() +"\",\"description\": \"Sensor Node MQTT creato dall'utente in data: "+new Date()+"\",\"adminState\": \"UNLOCKED\",\"operatingState\": \"UP\",\"labels\": [\"mqtt\",\"utente\"],\"serviceName\": \"device-mqtt\",\"profileName\": \"Test-Device-MQTT-Profile\",\"protocols\": {\"mqtt\": {\"CommandTopic\": \"command/" + sensorNode.getDevice() + "\"}}}}]";
+					deviceEdgeX = "[{\"apiVersion\": \"v2\",\"device\": {\"name\": \""+ sensorNode.getDevice() +"\",\"description\": \"Sensor Node MQTT creato dall'utente in data: "+new Date()+"\",\"adminState\": \"UNLOCKED\",\"operatingState\": \"UP\",\"labels\": [\"mqtt\",\"utente\"],\"serviceName\": \"device-mqtt\",\"profileName\": \"Test-Device-MQTT-Profile\",\"protocols\": {\"mqtt\": {\"CommandTopic\": \"command/"+sensorNode.getDevice()+"\"}}}}]";
 				}
-				else if(sensorNode.getProtocollo().getProtocol().equals("COAP")){
+				else if(sensorNode.getProtocollo().getProtocol().equals("COAP")){ 
 					deviceEdgeX = "[{\"apiVersion\": \"v2\",\"device\": {\"name\": \""+ sensorNode.getDevice() +"\",\"description\": \"Sensor Node COAP creato dall'utente in data: "+new Date()+"\",\"adminState\": \"UNLOCKED\",\"operatingState\": \"UP\",\"labels\": [\"coap\",\"utente\"],\"serviceName\": \"device-coap\",\"profileName\": \"example-datatype\",\"protocols\": {\"COAP\": {\"ED_ADDR\": \"192.168.138.252\", \"ED_PORT\": \""+ ((SensorNodeCOAP) sensorNode).getPort() +"\",\"ED_SecurityMode\": \"NoSec\"}}}}]";
 				}
 				else if(sensorNode.getProtocollo().getProtocol().equals("REST")){
@@ -173,14 +192,27 @@ public class ServletCreateSensorNode extends HttpServlet {
 			
 		//	request.setAttribute("messaggio", messaggio);
 		//	request.getRequestDispatcher("dashboard.html").forward(request, response);
-			
-			
-			
+		/*		
 			response.setContentType("text/plain");
 	        response.setCharacterEncoding("UTF-8");
 	        response.getWriter().write(messaggio);
+		*/	
 			
-			
+	        
+	        String result = "{\"result\":true,\"messaggio\":\"" +messaggio+ "\",\"redirect\":true,\"redirect_url\":\"dashboard.jsp\"}";
+			JSONObject m = null;
+			try {
+				 m = new JSONObject(result);
+				System.out.println("mess: " +m.toString());
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			response.setContentType("text/plain");
+			response.setCharacterEncoding("UTF-8");
+			response.getWriter().write(m.toString());
+	        
+	        
+	        
 			
 			
 			//response.getWriter().append("Served at: ").append(request.getContextPath());

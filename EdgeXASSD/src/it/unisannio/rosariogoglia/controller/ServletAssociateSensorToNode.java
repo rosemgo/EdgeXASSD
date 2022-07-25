@@ -15,6 +15,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import it.unisannio.rosariogoglia.dao.SensorDAO;
 import it.unisannio.rosariogoglia.dao.SensorNodeDAO;
 import it.unisannio.rosariogoglia.model.SensorNode;
@@ -77,35 +80,57 @@ public class ServletAssociateSensorToNode extends HttpServlet {
 			
 		
 		if(idNodoSensore==null) {
+									
+			String result = "{\"result\":\"false\",\"messaggio\":\"Non hai scelto un Nodo Sensore valido\",\"redirect\":true,\"redirect_url\":\"dashboard.jsp\"}";
+			JSONObject m = null;
+			try {
+				 m = new JSONObject(result);
+				System.out.println("mess: " +m.toString());
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+    //		String mess = json.toJson(m);
 			
-			messaggio = "Non hai scelto un Nodo Sensore valido";
-//			request.setAttribute("messaggio", messaggio);
-//			request.getRequestDispatcher("dashboard.html").forward(request, response);
+	//		messaggio = "Non hai scelto un Nodo Sensore valido";
 			
 			response.setContentType("text/plain");
-	        response.setCharacterEncoding("UTF-8");
-	        response.getWriter().write(messaggio);
+			response.setCharacterEncoding("UTF-8");
+	//		response.getWriter().write(messaggio);
+			response.getWriter().write(m.toString());
 			
 		}
 		else if (idSensor1==null && idSensor2==null && idSensor3==null){
 			
-			messaggio = "Non hai scelto nemmeno un Sensore";
-	//		request.setAttribute("messaggio", messaggio);
-	//		request.getRequestDispatcher("dashboard.html").forward(request, response);
-			
+			String result = "{\"result\":\"false\",\"messaggio\":\"Non hai scelto nemmeno un Sensore\",\"redirect\":true,\"redirect_url\":\"dashboard.jsp\"}";
+			JSONObject m = null;
+			try {
+				 m = new JSONObject(result);
+				System.out.println("mess: " +m.toString());
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
 			response.setContentType("text/plain");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(messaggio);
+			response.setCharacterEncoding("UTF-8");
+			response.getWriter().write(m.toString());
 			
 			
 		}
 		//verificare se è stato scelto più volte lo stesso sensore: (idSensor1==idSensor2) || (idSensor1 == idSensor3) || (idSensor2==idSensor3) 
 		else if(sceltaRipetuta) {
-			messaggio = "Hai scelto più volte lo stesso Sensore";
 			
+            String result = "{\"result\":\"false\",\"messaggio\":\"Hai scelto più volte lo stesso Sensore\",\"redirect\":true,\"redirect_url\":\"dashboard.jsp\"}";
+			JSONObject m = null;
+			try {
+				 m = new JSONObject(result);
+				System.out.println("mess: " +m.toString());
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
 			response.setContentType("text/plain");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(messaggio);
+			response.setCharacterEncoding("UTF-8");
+			response.getWriter().write(m.toString());
+            
+            
 		}		
 		else {
 						
@@ -161,15 +186,12 @@ public class ServletAssociateSensorToNode extends HttpServlet {
 					System.out.println("SensorNodeId " + idNodoSensore + " associato correttamente al sensore " + idSensors.get(i).getName() + "!!!"); 
 			}	
 			
-			//PRELEVO DAL DB IL NODO SENSORE SU CUI LANCIARE IL THREAD DI AVVIO MONITORAGGIO
 			System.out.println("ID NODO SENSORE DA CERCARE: " + idNodoSensore);
 			SensorNode sensorNode = snDAO.getSensorNodeByID(idNodoSensore); //sto caricando il nodo sensore con tutti i sensori associati
 			System.out.println("SENSOR NODE TROVATO: " + sensorNode.toString());
-					
 			
 			
-			
-			//INSERIRE il thread in un mappa statica fatta di chiave id del nodo sensore e valore il thread in modo da ricordarsi tutti i thread avviati e se viene effettuato un cambiamento al nodo sensore bisogna arrestare il thread. 
+			//inserire il thread in un mappa statica fatta di chiave id del nodo sensore e valore il thread in modo da ricordarsi tutti i thread avviati e se viene effettuato un cambiamento al nodo sensore bisogna arrestare il thread. 
 			ServletContext context = getServletContext();
 		    Map<Integer, Thread> mapThread = (Map<Integer, Thread>) context.getAttribute("mapThread");
 		    
@@ -206,15 +228,23 @@ public class ServletAssociateSensorToNode extends HttpServlet {
 	 */          
 	        
 	  //     this.printMap(mapThread);
-	        
-	        messaggio = "Associazione Sensori-Nodo Sensore avvenuta correttamente: Monitaroggio avviato!";
-	//		request.setAttribute("messaggio", messaggio);
 
-            response.setContentType("text/plain");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(messaggio);
+	    
+	        
+	  //    messaggio = "Associazione Sensori-Nodo Sensore avvenuta correttamente: Monitaroggio avviato!";
+	        String result = "{\"result\":true,\"messaggio\":\"Associazione Sensori-Nodo Sensore avvenuta correttamente: Monitaroggio avviato!\",\"redirect\":true,\"redirect_url\":\"dashboard.jsp\"}";
+			JSONObject m = null;
+			try {
+				 m = new JSONObject(result);
+				System.out.println("mess: " +m.toString());
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			response.setContentType("text/plain");
+			response.setCharacterEncoding("UTF-8");
+			response.getWriter().write(m.toString());
 	        		
-			
+
 			
 		}
 		
