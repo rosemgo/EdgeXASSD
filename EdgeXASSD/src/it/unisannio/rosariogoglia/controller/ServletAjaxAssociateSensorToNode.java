@@ -27,7 +27,7 @@ import it.unisannio.rosariogoglia.model.SensorNodeMQTT;
 public class ServletAjaxAssociateSensorToNode extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
-    /**
+	   /**
      * @see HttpServlet#HttpServlet()
      */
     public ServletAjaxAssociateSensorToNode() {
@@ -73,8 +73,8 @@ public class ServletAjaxAssociateSensorToNode extends HttpServlet {
          
             	System.out.println("IN SENSOR 1");
             	
-            	//DEVO FORNIRE SOLO I SENSORI NON ANCORA ASSOCIATI AL NODO SENSORE SCELTO
-            	List<Sensor> slist = sDAO.getSensorMancantiByIdSensorNode(idSensorNode);
+            	//DEVO FORNIRE SOLO I SENSORI NON ANCORA ASSOCIATI A NESSUN NODO SENSORE
+            	List<Sensor> slist = sDAO.getSensorMancantiByIdSensorNode();
             	for(int i=0; i<slist.size(); i++) {
                 	System.out.println(slist.get(i).toString());
             	}
@@ -96,7 +96,7 @@ public class ServletAjaxAssociateSensorToNode extends HttpServlet {
             	System.out.println("IDSENSORNODE RICEVUTO: " + idSensorNode);
            
             	//DEVO FORNIRE SOLO I SENSORI NON ANCORA ASSOCIATI AL NODO SENSORE SCELTO
-            	List<Sensor> slist = sDAO.getSensorMancantiByIdSensorNode(idSensorNode);
+            	List<Sensor> slist = sDAO.getSensorMancantiByIdSensorNode();
                 Gson json = new Gson();
                 String sensorList = json.toJson(slist);
                 response.setContentType("text/html");
@@ -120,5 +120,6 @@ public class ServletAjaxAssociateSensorToNode extends HttpServlet {
 		
 	
 	}
+
 
 }

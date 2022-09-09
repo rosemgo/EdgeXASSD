@@ -2,6 +2,7 @@ package it.unisannio.rosariogoglia.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -15,9 +16,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import it.unisannio.rosariogoglia.controller.ServletAssociateSensorToNode;
 import it.unisannio.rosariogoglia.dao.SensorDAO;
 import it.unisannio.rosariogoglia.dao.SensorNodeDAO;
 import it.unisannio.rosariogoglia.model.SensorNode;
@@ -31,6 +34,7 @@ import it.unisannio.rosariogoglia.model.Sensor;
 public class ServletAssociateSensorToNode extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
+	Logger logger = Logger.getLogger(ServletAssociateSensorToNode.class); 
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
@@ -173,7 +177,7 @@ public class ServletAssociateSensorToNode extends HttpServlet {
 	        	idSensors.add(sensor);
 	        }
 
-	
+	        String resultF = "";
 			int insertRow = -1;
 			
 			//ASSOCIO LA LISTA DI SENSORI AL NODO SENSORE NEL DATABASE
@@ -181,58 +185,70 @@ public class ServletAssociateSensorToNode extends HttpServlet {
 				
 			insertRow = snDAO.updateSensorListBySensorNodeId(idNodoSensore, idSensors);
 			System.out.println("INSERT ROW: " + insertRow);
-			if(insertRow != -1){			
+			if(insertRow != -1){		
+				
+				messaggio = "Associazione Sensori-Nodo Sensore avvenuta correttamente: Monitaroggio avviato!";
+				resultF = "true";
+				
 				for(int i=0; i<idSensors.size(); i++)
 					System.out.println("SensorNodeId " + idNodoSensore + " associato correttamente al sensore " + idSensors.get(i).getName() + "!!!"); 
-			}	
-			
-			System.out.println("ID NODO SENSORE DA CERCARE: " + idNodoSensore);
-			SensorNode sensorNode = snDAO.getSensorNodeByID(idNodoSensore); //sto caricando il nodo sensore con tutti i sensori associati
-			System.out.println("SENSOR NODE TROVATO: " + sensorNode.toString());
-			
-			
-			//inserire il thread in un mappa statica fatta di chiave id del nodo sensore e valore il thread in modo da ricordarsi tutti i thread avviati e se viene effettuato un cambiamento al nodo sensore bisogna arrestare il thread. 
-			ServletContext context = getServletContext();
-		    Map<Integer, Thread> mapThread = (Map<Integer, Thread>) context.getAttribute("mapThread");
-		    
-		    //se già esiste un thread in esecuzione sul nodo sensore caricato, è necessario ucciderlo ed avviarne uno nuovo in quanto sono stati associati nuovi sensori al nodo sensore
-		    //PER OGNI NODO SENSORE DEVO AVERE UN SOLO THREAD IN ESECUZIONE
-		    if(mapThread.get(sensorNode.getIdSensorNode()) != null) {
-		    	Integer idSensorNodeToKill = sensorNode.getIdSensorNode();
-		    	try{ 
-		    		mapThread.get(idSensorNodeToKill).interrupt(); //ammazzo il thread	    	
-		    	}catch(Exception e){System.out.println("Exception handled "+e);}
-		    } 		
-			
-		    //devo avviare il thread per il nodo sensore selezionato
-			Thread threadSN = new Thread(sensorNode);
-			threadSN.start();
-			System.out.println("thread avviato");
-	       	
-			//inserisco il thread relativo al nodo sensore nella mappa
-			mapThread.put(idNodoSensore, threadSN);
-	        
-	        //stampo il contenuto della mappa
-	        Iterator<Map.Entry<Integer, Thread>> entries = mapThread.entrySet().iterator();
-	        while (entries.hasNext()) {
-	            Map.Entry<Integer, Thread> entry = entries.next();
-	            System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
-	        }
-	        
-	 /*     Altro metodo per stampare il contenuto della hashmap    
-	    	for (Map.Entry<Integer, Thread> entry : mapThread.entrySet()) {
-	            Integer key = entry.getKey();
-	            Thread value = entry.getValue();
-	            System.out.println("Key = " + key + ", Value = " + value);
-	        }
-	 */          
-	        
-	  //     this.printMap(mapThread);
+				
+				
+				System.out.println("ID NODO SENSORE DA CERCARE: " + idNodoSensore);
+				SensorNode sensorNode = snDAO.getSensorNodeByID(idNodoSensore); //sto caricando il nodo sensore con tutti i sensori associati
+				System.out.println("SENSOR NODE TROVATO: " + sensorNode.toString());
+				
+				
+				//inserire il thread in un mappa statica fatta di chiave id del nodo sensore e valore il thread in modo da ricordarsi tutti i thread avviati e se viene effettuato un cambiamento al nodo sensore bisogna arrestare il thread. 
+				ServletContext context = getServletContext();
+			    Map<Integer, Thread> mapThread = (Map<Integer, Thread>) context.getAttribute("mapThread");
+			    
+			    //se già esiste un thread in esecuzione sul nodo sensore caricato, è necessario ucciderlo ed avviarne uno nuovo in quanto sono stati associati nuovi sensori al nodo sensore
+			    //PER OGNI NODO SENSORE DEVO AVERE UN SOLO THREAD IN ESECUZIONE
+			    if(mapThread.get(sensorNode.getIdSensorNode()) != null) {
+			    	Integer idSensorNodeToKill = sensorNode.getIdSensorNode();
+			    	try{ 
+			    		mapThread.get(idSensorNodeToKill).interrupt(); //ammazzo il thread	    	
+			    	}catch(Exception e){System.out.println("Exception handled "+e);}
+			    } 		
+				
+			    //devo avviare il thread per il nodo sensore selezionato
+				Thread threadSN = new Thread(sensorNode);
+				threadSN.start();
+				System.out.println("thread avviato");
+		       	
+				//inserisco il thread relativo al nodo sensore nella mappa
+				mapThread.put(idNodoSensore, threadSN);
+		        
+		        //stampo il contenuto della mappa
+		        Iterator<Map.Entry<Integer, Thread>> entries = mapThread.entrySet().iterator();
+		        while (entries.hasNext()) {
+		            Map.Entry<Integer, Thread> entry = entries.next();
+		            System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+		        }
+		        
+		 /*     Altro metodo per stampare il contenuto della hashmap    
+		    	for (Map.Entry<Integer, Thread> entry : mapThread.entrySet()) {
+		            Integer key = entry.getKey();
+		            Thread value = entry.getValue();
+		            System.out.println("Key = " + key + ", Value = " + value);
+		        }
+		 */          
+		        
+		  //     this.printMap(mapThread);
 
 	    
-	        
+			}
+			else {
+				
+				messaggio = "Associazione non avvenuta correttamente";
+				resultF = "false";
+				logger.info(new Date()+" "+messaggio);	
+			}
+					
+			
 	  //    messaggio = "Associazione Sensori-Nodo Sensore avvenuta correttamente: Monitaroggio avviato!";
-	        String result = "{\"result\":true,\"messaggio\":\"Associazione Sensori-Nodo Sensore avvenuta correttamente: Monitaroggio avviato!\",\"redirect\":true,\"redirect_url\":\"dashboard.jsp\"}";
+	        String result = "{\"result\":"+resultF+",\"messaggio\":\""+messaggio+"\",\"redirect\":true,\"redirect_url\":\"dashboard.jsp\"}";
 			JSONObject m = null;
 			try {
 				 m = new JSONObject(result);
@@ -244,7 +260,7 @@ public class ServletAssociateSensorToNode extends HttpServlet {
 			response.setCharacterEncoding("UTF-8");
 			response.getWriter().write(m.toString());
 	        		
-
+			
 			
 		}
 		

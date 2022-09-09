@@ -113,6 +113,7 @@ public class ServletCreateSensorNode extends HttpServlet {
 		}
 		else {
 			
+			String resultF = "";
 		//	SensorNodeDAO snDAO = new SensorNodeDAO();
 		//	ProtocolDAO pDAO = new ProtocolDAO();
 			Protocol protocol = pDAO.getProtocolById(sensorNodeProtocol);
@@ -145,7 +146,9 @@ public class ServletCreateSensorNode extends HttpServlet {
 			if(idSensorNode!=-1) {
 				messaggio = "Nodo Sensore n° "+ sensorNode.getIdSensorNode() + " " + sensorNode.getDevice() + " creato correttamente!";
 				logger.info(new Date()+" "+messaggio);
+				resultF = "true";
 				
+				//CREAO IN EDGEX IL DEVICE CORRISPONDENTE AL NODO SENSORE
 				String deviceEdgeX = "";
 			
 				//DIFFERENZIARE LE STRINGHE DA CREARE IN BASE AL TIPO DI PROTOCOLLO SCELTO
@@ -154,7 +157,7 @@ public class ServletCreateSensorNode extends HttpServlet {
 				if(sensorNode.getProtocollo().getProtocol().equals("MQTT")) {
 					deviceEdgeX = "[{\"apiVersion\": \"v2\",\"device\": {\"name\": \""+ sensorNode.getDevice() +"\",\"description\": \"Sensor Node MQTT creato dall'utente in data: "+new Date()+"\",\"adminState\": \"UNLOCKED\",\"operatingState\": \"UP\",\"labels\": [\"mqtt\",\"utente\"],\"serviceName\": \"device-mqtt\",\"profileName\": \"Test-Device-MQTT-Profile\",\"protocols\": {\"mqtt\": {\"CommandTopic\": \"command/"+sensorNode.getDevice()+"\"}}}}]";
 				}
-				else if(sensorNode.getProtocollo().getProtocol().equals("COAP")){ 
+				else if(sensorNode.getProtocollo().getProtocol().equals("COAP")){                                                           																																																																//15.160.103.223 USARE L'INDIRIZZO DELL'ISTANZA AMAZON AWS IN CUI E' DEPLOYATA L'APP JAVA (quindi il nodo sensore COAP)										
 					deviceEdgeX = "[{\"apiVersion\": \"v2\",\"device\": {\"name\": \""+ sensorNode.getDevice() +"\",\"description\": \"Sensor Node COAP creato dall'utente in data: "+new Date()+"\",\"adminState\": \"UNLOCKED\",\"operatingState\": \"UP\",\"labels\": [\"coap\",\"utente\"],\"serviceName\": \"device-coap\",\"profileName\": \"example-datatype\",\"protocols\": {\"COAP\": {\"ED_ADDR\": \"192.168.138.252\", \"ED_PORT\": \""+ ((SensorNodeCOAP) sensorNode).getPort() +"\",\"ED_SecurityMode\": \"NoSec\"}}}}]";
 				}
 				else if(sensorNode.getProtocollo().getProtocol().equals("REST")){
@@ -165,9 +168,10 @@ public class ServletCreateSensorNode extends HttpServlet {
 				
 				HttpClient client = HttpClient.newBuilder().build();
 				
+				//invio una richiesta REST al servizio metadata per aggiungere un device ad EdgeX
 				HttpRequest requestEdgeX = HttpRequest.newBuilder()  
-				        .uri(URI.create("http://192.168.204.133:59881/api/v2/device")) //invio una richiesta REST al servizio metadata per aggiungere un device ad EdgeX
-				        .timeout(Duration.ofMinutes(2))
+				      	.uri(URI.create("http://15.160.35.22:59881/api/v2/device")) //UTILIZZARE QUESTO INDIRIZZO PER USARE EDGEX SU CLOUD AWS, UTILIZZARE 192.168.204.133 PER USARE EDGEX NELLA MACCHINA VIRTUALE LOCALE
+						.timeout(Duration.ofMinutes(2))
 				        .header("Content-Type", "application/json")
 				        .POST(BodyPublishers.ofString( deviceEdgeX )) //BodyPublisher converte un oggetto java di alto livello in un flusso di dati
 				        .build();
@@ -184,6 +188,7 @@ public class ServletCreateSensorNode extends HttpServlet {
 				
 			}
 			else {
+				resultF = "false";
 				messaggio="Nodo Sensore "+ sensorNodeName +" non creato correttamente!!!";
 				logger.info(new Date()+" "+messaggio);	
 				
@@ -199,7 +204,7 @@ public class ServletCreateSensorNode extends HttpServlet {
 		*/	
 			
 	        
-	        String result = "{\"result\":true,\"messaggio\":\"" +messaggio+ "\",\"redirect\":true,\"redirect_url\":\"dashboard.jsp\"}";
+	        String result = "{\"result\":"+resultF+",\"messaggio\":\"" +messaggio+ "\",\"redirect\":true,\"redirect_url\":\"dashboard.jsp\"}";
 			JSONObject m = null;
 			try {
 				 m = new JSONObject(result);
