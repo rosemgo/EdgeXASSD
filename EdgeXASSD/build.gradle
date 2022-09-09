@@ -5,6 +5,10 @@ apply plugin: 'java'
 //Apply war plugin
 apply plugin: 'war'
 
+// creazione del file war nella cartella build\libs, nella post compilazione di Jenkins viene deployato su Tomcat 
+// War file name 
+war.baseName = 'AsteOnLine'
+
 //Apply Findbugs inspection plugin
 //apply plugin: 'findbugs'
 
@@ -57,22 +61,17 @@ dependencies {
 
 	//Import della libreira Http per usare REST
 	compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.6'
-	
-	 
-	 
+		 
 	//Import delle librerie MQTT
 	implementation group: 'org.eclipse.paho', name: 'org.eclipse.paho.client.mqttv3', version: '1.2.5'
 	
 	//Import JSTL
 	implementation 'javax.servlet.jsp.jstl:jstl:1.2'
-	
-	
-	
+		
   	implementation "com.influxdb:influxdb-client-java:4.3.0"
 
 	 
 } 
-
 
 
 //setting del task Javadoc
