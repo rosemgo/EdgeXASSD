@@ -3,11 +3,14 @@ package it.unisannio.rosariogoglia.model;
 
 import java.util.List;
 
+import it.unisannio.rosariogoglia.model.Protocol;
+import it.unisannio.rosariogoglia.model.Sensor;
+
 
 public abstract class SensorNode implements Runnable{
 	
 	protected int idSensorNode; //id incrementale ed univoco, ogni sensore di uno specifico protocollo deve avere un id crescente
-	protected String device;
+	protected String device; //sarebbe il nome del SensorNodo e deve coincidere con il device corrispondente in EdgeX
 	protected transient List<Sensor> sensors; ////SOSTITUIRE CON UN ARRAY DI SENSORI sensore: temperatura, umidità, velocità
 	protected Protocol protocollo;
 	protected boolean exitThread;	
@@ -62,6 +65,8 @@ public abstract class SensorNode implements Runnable{
 	public String toString() {
 		return (this.idSensorNode + " " + this.device + " " + this.protocollo.getProtocol());
 	}
+	
+//	public abstract void run();	
 	
 	public void stopThreadh() {
 		exitThread = true;
