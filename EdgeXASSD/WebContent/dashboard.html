@@ -1,4 +1,7 @@
-<%@page language="java" contentType="text/html" import="java.sql.*" pageEncoding="UTF-8"%>
+<!--  <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %> DECOMMENTARE SE SI VUOLE UTILIZZARE LE EL JSP --> 
+
+<!-- <%@page language="java" contentType="text/html" import="java.sql.*" pageEncoding="UTF-8"%> -->
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -7,28 +10,142 @@
       <!--  <meta http-equiv=refresh content="5; url=/dashboard.html" />  Reindirizzare ad una pagina dopo 5 secondi -->  
         
         <title>DASHBOARD EdgeXASSD</title>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
         
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+      
+      <!--  <link href="css/style.css" type="text/css" rel="stylesheet"> -->
+      
         <style type="text/css">
+        
+        	.header {
+			  overflow: hidden;
+			  background-color: #f1f1f1;
+			  padding: 20px 10px;
+			}
+			
+			/* Style the header links */
+			.header a {
+			  float: left;
+			  color: black;
+			  text-align: center;
+			  padding: 12px;
+			  text-decoration: none;
+			  font-size: 18px;
+			  line-height: 25px;
+			  border-radius: 4px;
+			}
+			
+			/* Style the logo link (notice that we set the same value of line-height and font-size to prevent the header to increase when the font gets bigger */
+			.header a.logo {
+			  font-size: 25px;
+			  font-weight: bold;
+			}
+			
+			/* Change the background color on mouse-over */
+			.header a:hover {
+			  background-color: #ddd;
+			  color: black;
+			}
+			
+			/* Style the active/current link*/
+			.header a.active {
+			  background-color: dodgerblue;
+			  color: white;
+			}
+			
+			/* Float the link section to the right */
+			.header-right {
+			  float: right;
+			}
+			
+			/* Add media queries for responsiveness - when the screen is 500px wide or less, stack the links on top of each other */
+			@media screen and (max-width: 500px) {
+			  .header a {
+			    float: none;
+			    display: block;
+			    text-align: left;
+			  }
+			  .header-right {
+			    float: none;
+			  }
+			}
+        
+        
+        /* 
+        	.header{
+			 	background-color:#DDDDDD;  
+				background: -moz-linear-gradient(#DDDDDD, #ffffff ); 
+				background: -webkit-linear-gradient(#DDDDDD, #ffffff); 
+				width:auto; 
+				height:80px; 
+				padding: 0px 0px 0px 0px;
+			} */
+        
             body{
-                background: url(image/roenkae.jpg);
+                background: url(sfondo_dashboard.png);
                 background-size: cover;
+                width: 100%;
+  				height:100%;
             }
             
             .drop-down-list{
-                margin: 150px auto;
-                width: 40%;
+                margin: 40px auto 10px;
+                width: 90%;
                 padding: 30px;
-            }
+            } 
+            
+            /* Create four equal columns that floats next to each other */
+			.column {
+			 float: left;
+			 width: 50%;
+			}
+			
+			
+			/* Clear floats */
+			.row:after {
+			 content: "";
+			 display: table;
+			 clear: both;
+			}
            
+            /* Responsive layout - makes a two column-layout instead of four columns */
+			@media screen and (max-width: 900px) {
+			 .column {
+			 width: 50%;
+			 }
+			}
+			
+			
+			/* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+			@media screen and (max-width: 600px) {
+			 .column {
+			 width: 100%;
+			 }
+			}
             
         </style>
+        
     </head>
-    <body class="red">
-        <div class="container">
+    
+    <body class="">
+        
+            
+             <div class="header">
+			  <a href="#default" class="logo">LogoEdgeXASSD</a>
+			  <div class="header-right">
+			    <a class="active" href="dashboard.html">Home</a>
+			    <a href="sensorMonitoring.html">Monitoraggio Sensori</a>
+			    <a href="#about">About</a>
+			  </div>
+			</div> 
+			
+           <div class="container">
+           	
+           	<div class="column">
+            
             
             <!-- FORM PER LA CREAZIONE DEL NODO SENSORE -->
-                        
+                
 	            <div class="drop-down-list card" style="float:left; ">  
 	            	<div class="center">
 	                    <h5>Create  Sensor Node</h5>
@@ -56,22 +173,51 @@
 	                        	                        
 	                    </div>             	
 	            		<div class="center">
-							<input class="btn" type="button" value="Submit" id="buttonCreate">          		
-	                    <!-- <button class="btn" id="buttonCreate" >Create</button> CON <BUTTON> NON FUNZIONA IL redirect NELLE FUNZIONI JQUERY window.location.href = "dashboard.jsp" --> 
+							<input class="btn" type="button" value="Create" id="buttonCreate">          		
+	                    <!-- <button class="btn" id="buttonCreate" >Create</button> CON <BUTTON> NON FUNZIONA IL redirect NELLE FUNZIONI JQUERY window.location.href = "dashboard.html" --> 
+	                    </div>
+	            	</form>
+	          			 
+	          		
+	          			 
+	          			 	            
+	            </div>
+	            
+	            <!-- FORM PER IL RESET DEL NODO SENSORE (DISASSOCIA TUTTI I SENSORI DAL NODO)-->
+                      
+	            <div class="drop-down-list card" style="float:left; ">  
+	            	<div class="center">
+	                    <h5>Reset Sensor Node</h5>
+	                </div>
+	            	<div class="divider"></div>
+	            	
+	           
+	            	<form> 	
+	            		<div class="input-field">
+	                        <select id="sensornodelist" name="idSensorNode">
+	                            <option>Select Sensor Node</option>
+	                        </select>
+						</div>
+	                    <div class="center">
+							<input class="btn" type="button" value="Reset" id="buttonReset">          		
 	                    </div>
 	            	</form>
 	          			 	            
 	            </div>
-                     
-                     
-                <!-- FORM PER LA ASSOCIAZIONE NODO SENSORE - SENSRI-->     
+	       
+         </div>
+          
+          
+         <div class="column">  
+         
+                   
+                <!-- FORM PER LA ASSOCIAZIONE NODO SENSORE - SENSORI-->     
                           
 	            <div class="drop-down-list card" style="float:right; ">
 	                <div class="center">
 	                    <h5>Associate Sensor to Sensor Node</h5>
 	                </div>
-	                <div class="divider"></div>
-	                
+	                <div class="divider"></div>                
 	               
 	         		<!--  <form action="ServletAssociateSensorToNode" method="get"> -->
 	         		
@@ -97,12 +243,13 @@
 	                        </select>
 	                    </div>
 	                    <div class="center">
-	                        <input class="btn" type="button" value="Submit" id="buttonSubmit">
+	                        <input class="btn" type="button" value="Start" id="buttonSubmit">
 	                       <!--  <button class="btn" id="buttonSubmit">Submit</button> -->
 	                    </div>
 	                </form>
 	                
-	    <!--      	<p>&nbsp;</p>
+	    <!--      	
+	    			<p>&nbsp;</p>
   		  			<p align="center" id="success"> 
   						<font size="4"> MESSAGGIO: ${messaggio} </font> 
   					</p>
@@ -110,18 +257,29 @@
 	                
 	                
 	            </div>
+	            
+	            
+	       </div>
+	            
+      
+	            
+	            
             
             </div>
             
             
-        <div style="clear:both;"></div>
-            
+     <!--    <div style="clear:both;"></div> -->
+          
+       
+ 
         <div class="divider"></div>
         
       
 	  	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script> <!-- Utilizzata per i drop down menù -->
-  	    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Utilizzata per la finestra popout con gli avvisi in seguito all'associazione o alla creazione dei nodi sensori -->
+  	    
+  	    <!-- Utilizzata per la finestra popout (Sweet Alert) con gli avvisi in seguito all'associazione o alla creazione dei nodi sensori -->
+  	    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
   	    <script src="sweetalert2.all.min.js"></script>
   	    
         <script type="text/javascript">
@@ -129,7 +287,6 @@
         	$(document).ready(function () {        		
                 
         		//MENU' SELEZIONE PROTOCOLLI
-        		
         		$.ajax({
                 	url: "ServletAjaxProtocolList",
                     method: "GET",
@@ -152,6 +309,112 @@
                     },
                     cache: false
                 });
+        		
+        		//FUNZIONE CLIC BOTTOM CREATE SENSOR NODE
+                $('#buttonCreate').click(function () {	 
+      			    console.log("CLIC BUTTOM");
+      			    
+      				let nameSensorNode = $('#nameSensorNode').val(); //sarebbe l'id nel form
+      				console.log("SENSOR NODE: " + nameSensorNode);
+      				let protocol = $('#protocol').val(); //sarebbe l'id nel form
+      				console.log("PROTOCOL ID: " + protocol);
+      			          				
+      			    let dati = {
+      			    	device : nameSensorNode,
+      			    	idProtocol : protocol
+      			    };
+      			  //console.log("DEVICE: " + dati.device);
+      				 $.ajax({      					 
+      					 url: "ServletCreateSensorNode",
+      					 dataType: "json",
+      					 method: "POST",
+      			         data: dati,    //$("#idForm").serialize()                    
+      			         async: false, 
+      			         success: function (messaggio, textStatus, jqXHR) { //messaggio è il messaggio ricevuto dalla servlet
+      			        	console.log("SUCCESSS");
+      			        	
+      			         //	alert(messaggio); 
+      			        	
+      			        	//INSERIRE IL MESSAGGIO CON ANIMAZIONE
+      			          	let m = messaggio.messaggio;      			   
+    			      		console.log("messaggio: " + messaggio.messaggio);
+	      			       	if(messaggio.result == true){ //associazione Nodo Sensore Sensore è andata a buon fine
+	      			       		console.log("result: " + messaggio.result);
+			      			  	let timerInterval
+			      			    Swal.fire({
+			      			    	icon: 'success',
+			      			    //  title: m,
+			      			    	text: m,
+			      			    //  html: 'I will close in <b>3000</b> milliseconds.',
+			      			      	timer: 2000,
+			      				    showConfirmButton: true, //non mostrare il tasto ok
+				      			  //confirmButtonText: 'Ho capito!'
+			      			      	timerProgressBar: true,
+			      			   /* 	didOpen: () => {
+			      			        	Swal.showLoading()
+			      			        	const b = Swal.getHtmlContainer().querySelector('b')
+			      			        	timerInterval = setInterval(() => {
+			      			          		b.textContent = Swal.getTimerLeft()
+			      			        	}, 100)
+			      			      	}, 
+			      			      	willClose: () => {
+			      			        	clearInterval(timerInterval)
+			      			      	} */
+			      			    }).then((result) => {
+			       			    	if (result.dismiss === Swal.DismissReason.timer) {
+			      			        	console.log('I was closed by the timer')
+			      			      		window.location.href = "dashboard.html";
+			      			      	}
+			      			      	else{
+			      			    		window.location.href = "dashboard.html";
+			      			      	}
+			      			    })     			   	
+    			       		}
+    			       		else{ //associazione Nodo Sensore Sensore NON è andata a buon fine      			       			
+	      			       		console.log("result: " + messaggio.result);
+	      			       		console.log("messaggio in else: " + messaggio.messaggio);
+    			       			let timerInterval
+			      			    Swal.fire({
+			      			    	icon: 'error',
+			      			   // 	title: m,
+			      			    	text: m,
+			      			   //     html: 'I will close in <b>3</b> milliseconds.',
+			      			      	timer: 2000,
+			      				  //showConfirmButton: true, //non mostrare il tasto ok
+				      			  //confirmButtonText: 'Ho capito!'
+			      			      	timerProgressBar: true,
+			      			   /* 	didOpen: () => {
+			      			        	Swal.showLoading()
+			      			        	const b = Swal.getHtmlContainer().querySelector('b')
+			      			        	timerInterval = setInterval(() => {
+			      			          		b.textContent = Swal.getTimerLeft()
+			      			        	}, 100)
+			      			      	}, 
+			      			      	willClose: () => {
+			      			        	clearInterval(timerInterval)
+			      			      	} */
+			      			    }).then((result) => {
+			       			    	if (result.dismiss === Swal.DismissReason.timer) {
+			      			        	console.log('I was closed by the timer')
+			      			      		window.location.href = "dashboard.html";
+			      			      	}
+			      			      	else{
+			      			    		window.location.href = "dashboard.html";
+			      			      	}
+			      			    })       			       		
+    			       		}
+      			        	      			        	
+      			         },
+      			         error: function (jqXHR, textStatus, errorThrown) {
+      			        	 console.log("ERROREEEE");
+      			        	 alert('<form>State Unavailable</form>');
+      			         },
+      			         cache: false
+      			     });
+      				
+      			   
+      			}); 
+        		       		
         		
         		//MENU' DI SELEZIONE NODE SENSORE E 3 SENSORI	
         		
@@ -298,11 +561,6 @@
                                   
                 });
                 
-             
-                
-                
-                
-                
                 /* APPUNTO DA RICORDARE come fare il parse con jsnon
 					$.ajax({
 					  type: 'GET',
@@ -325,114 +583,9 @@
 					  }
 					});
                 
-                */
-
-				//FARE FUNZIONE CLIC BOTTOM CREATE SENSOR NODE
-                $('#buttonCreate').click(function () {	 
-      			    console.log("CLIC BUTTOM");
-      			    
-      				let nameSensorNode = $('#nameSensorNode').val();
-      				console.log("SENSOR NODE: " + nameSensorNode);
-      				let protocol = $('#protocol').val();
-      				console.log("PROTOCOL ID: " + protocol);
-      			          				
-      			    let dati = {
-      			    	device : nameSensorNode,
-      			    	idProtocol : protocol
-      			    };
-      			  //console.log("DEVICE: " + dati.device);
-      				 $.ajax({      					 
-      					 url: "ServletCreateSensorNode",
-      					 dataType: "json",
-      					 method: "POST",
-      			         data: dati,    //$("#idForm").serialize()                    
-      			         async: false, 
-      			         success: function (messaggio, textStatus, jqXHR) { //messaggio è il messaggio ricevuto dalla servlet
-      			        	console.log("SUCCESSS");
-      			        	
-      			         //	alert(messaggio); 
-      			        	
-      			        	//INSERIRE IL MESSAGGIO CON ANIMAZIONE
-      			          	let m = messaggio.messaggio;      			   
-    			      		console.log("messaggio: " + messaggio.messaggio);
-	      			       	if(messaggio.result == true){ //associazione Nodo Sensore Sensore è andata a buon fine
-	      			       		console.log("result: " + messaggio.result);
-			      			  	let timerInterval
-			      			    Swal.fire({
-			      			    	icon: 'success',
-			      			    //  title: m,
-			      			    	text: m,
-			      			    //  html: 'I will close in <b>3000</b> milliseconds.',
-			      			      	timer: 2000,
-			      				    showConfirmButton: true, //non mostrare il tasto ok
-				      			  //confirmButtonText: 'Ho capito!'
-			      			      	timerProgressBar: true,
-			      			   /* 	didOpen: () => {
-			      			        	Swal.showLoading()
-			      			        	const b = Swal.getHtmlContainer().querySelector('b')
-			      			        	timerInterval = setInterval(() => {
-			      			          		b.textContent = Swal.getTimerLeft()
-			      			        	}, 100)
-			      			      	}, 
-			      			      	willClose: () => {
-			      			        	clearInterval(timerInterval)
-			      			      	} */
-			      			    }).then((result) => {
-			       			    	if (result.dismiss === Swal.DismissReason.timer) {
-			      			        	console.log('I was closed by the timer')
-			      			      		window.location.href = "dashboard.jsp";
-			      			      	}
-			      			      	else{
-			      			    		window.location.href = "dashboard.jsp";
-			      			      	}
-			      			    })     			   	
-    			       		}
-    			       		else{ //associazione Nodo Sensore Sensore NON è andata a buon fine      			       			
-	      			       		console.log("result: " + messaggio.result);
-	      			       		console.log("messaggio in else: " + messaggio.messaggio);
-    			       			let timerInterval
-			      			    Swal.fire({
-			      			    	icon: 'error',
-			      			   // 	title: m,
-			      			    	text: m,
-			      			   //     html: 'I will close in <b>3</b> milliseconds.',
-			      			      	timer: 2000,
-			      				  //showConfirmButton: true, //non mostrare il tasto ok
-				      			  //confirmButtonText: 'Ho capito!'
-			      			      	timerProgressBar: true,
-			      			   /* 	didOpen: () => {
-			      			        	Swal.showLoading()
-			      			        	const b = Swal.getHtmlContainer().querySelector('b')
-			      			        	timerInterval = setInterval(() => {
-			      			          		b.textContent = Swal.getTimerLeft()
-			      			        	}, 100)
-			      			      	}, 
-			      			      	willClose: () => {
-			      			        	clearInterval(timerInterval)
-			      			      	} */
-			      			    }).then((result) => {
-			       			    	if (result.dismiss === Swal.DismissReason.timer) {
-			      			        	console.log('I was closed by the timer')
-			      			      		window.location.href = "dashboard.jsp";
-			      			      	}
-			      			      	else{
-			      			    		window.location.href = "dashboard.jsp";
-			      			      	}
-			      			    })       			       		
-    			       		}
-      			        	      			        	
-      			         },
-      			         error: function (jqXHR, textStatus, errorThrown) {
-      			        	 console.log("ERROREEEE");
-      			        	 alert('<form>State Unavailable</form>');
-      			         },
-      			         cache: false
-      			     });
-      				
-      			   
-      			}); 
+                */				
                 
-                
+              //FUNZIONE PER ASSOCIARE IL NODO SENSORE AI SENSORI  
                 
       		  //$(document).on("click", "#buttonSubmit", function() {
      	      $('#buttonSubmit').click(function () {	 
@@ -467,7 +620,7 @@
       			              			       		
       			       	/*	PRIMA SOLUZIONE
       			       		alert(messaggio.messaggio) 	
-      			        	window.location.href = "dashboard.jsp"; //affichè funzioni è necessario che il bottone, che attiva la funzione al click, sia in <input type=button> e NON <button>
+      			        	window.location.href = "dashboard.html"; //affichè funzioni è necessario che il bottone, che attiva la funzione al click, sia in <input type=button> e NON <button>
       			      	*/		        
       			            			      	
 	      			       	//SECONDA SOLUZIONE
@@ -498,10 +651,10 @@
 			      			    }).then((result) => {
 			       			    	if (result.dismiss === Swal.DismissReason.timer) {
 			      			        	console.log('I was closed by the timer')
-			      			      		window.location.href = "dashboard.jsp";
+			      			      		window.location.href = "dashboard.html";
 			      			      	}
 			      			      	else{
-			      			    		window.location.href = "dashboard.jsp";
+			      			    		window.location.href = "dashboard.html";
 			      			      	}
 			      			    })     			   	
       			       		}
@@ -531,10 +684,10 @@
 			      			    }).then((result) => {
 			       			    	if (result.dismiss === Swal.DismissReason.timer) {
 			      			        	console.log('I was closed by the timer')
-			      			      		window.location.href = "dashboard.jsp";
+			      			      		window.location.href = "dashboard.html";
 			      			      	}
 			      			      	else{
-			      			    		window.location.href = "dashboard.jsp";
+			      			    		window.location.href = "dashboard.html";
 			      			      	}
 			      			    })       			       		
       			       		}
@@ -550,10 +703,10 @@
 				      			      }).then((result) => {
 				            		  	if (result.dismiss === Swal.DismissReason.timer) {
 				            			        console.log('I was closed by the timer')
-				            			      	window.location.href = "dashboard.jsp";
+				            			      	window.location.href = "dashboard.html";
 				            			}
 				            			else{
-				            			    	window.location.href = "dashboard.jsp";
+				            			    	window.location.href = "dashboard.html";
 				            			}   	    
 				   			    	  })
 				      		*/	      	
@@ -563,29 +716,164 @@
 		      			  			if (messaggio.redirect) {
 		  			        			console.log("ENTRO NELL IF" );
 		  			        			window.location.href = messaggio.redirect_url;
-		  			            	//  window.location.href = "dashboard.jsp";
+		  			            	//  window.location.href = "dashboard.html";
 		  			                }
 		  			       */	
 		      			       		     			       		
 		      			   /* 		//aspetto 3,1 secondi, sarebbe il tempo necessario per far apparire il messaggio che dura 3 secondi   		
 		       			        	setTimeout(function() {
 		      			        	 	console.log("IN FUNCTION TIMEOUT");	
-		      			        	  	window.location.href = "dashboard.jsp";
+		      			        	  	window.location.href = "dashboard.html";
 		      			        	}, 3100);
 		      			    */         					
       			         },
       			         error: function (jqXHR, textStatus, errorThrown) {
       			        	 console.log("ERROREEEE");
       			        	 alert('State Unavailable');
-      			        	 window.location.href = "dashboard.jsp"
+      			        	 window.location.href = "dashboard.html"
       			         },
       			         cache: false
       			     });
       				
       			   
       			}); 
-                
+               
+     	      
+     	      
+     	   
+    		//FUNZIONE PER CARICARE LA LISTA DI NODI SENSORE	
+     	    $.ajax({
+                	url: "ServletAjaxSensorNodeList",
+                    method: "GET",
+                    data: {operation: 'sensorNode'},
+                    success: function (data, textStatus, jqXHR) {
+               	  		
+                    	console.log("data SENSOR NODE: " + data);
+                        let listaSensorsNode = $.parseJSON(data);
+                        console.log("listaSensorsNode: " + listaSensorsNode);
+                     
+                        $.each(listaSensorsNode, function (key, value) {	
+                    	  	console.log("value id: " + value.idSensorNode );
+                        	console.log("value name: " + value.device );
+                            $('#sensornodelist').append('<option value="' + value.idSensorNode + '">' + value.device + '</option>')
+                        });
+                        $('select').formSelect();
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        $('#sensornodelist').append('<option>Sensor Node Unavailable</option>');
+                    },
+                    cache: false
+                }); 
+    		
     
+     	      
+     	  //FUNZIONE CLIC BOTTOM RESET SENSOR NODE
+             $('#buttonReset').click(function () {	 
+   			    console.log("CLIC BUTTOM RESET");
+   			    
+   				let sensornodeid = $('#sensornodelist').val();
+   				console.log("SENSOR NODE ID: " + sensornodeid);
+   			          				
+   			    let dati = {
+   			    	idNodoSensore : sensornodeid
+   			    };
+   			  //console.log("DEVICE: " + dati.device);
+   				$.ajax({      					 
+   					 url: "ServletResetSensorNode",
+   					 dataType: "json",
+   					 method: "POST",
+   			         data: dati,                       
+   			         async: false, 
+   			         success: function (messaggio, textStatus, jqXHR) { //messaggio è il messaggio ricevuto dalla servlet
+   			        	console.log("SUCCESSS");
+   			        	console.log("messaggio tutto: " + messaggio); 
+   			         //	alert(messaggio); 
+   			        	
+   			        	//INSERIRE IL MESSAGGIO CON ANIMAZIONE
+   			          	let m = messaggio.messaggio;      			   
+ 			      		console.log("messaggio: " + messaggio.messaggio);
+	      			       	if(messaggio.result == true){ //associazione Nodo Sensore Sensore è andata a buon fine
+	      			       		console.log("result: " + messaggio.result);
+			      			  	let timerInterval
+			      			    Swal.fire({
+			      			    	icon: 'success',
+			      			    //  title: m,
+			      			    	text: m,
+			      			    //  html: 'I will close in <b>3000</b> milliseconds.',
+			      			      	timer: 2000,
+			      				    showConfirmButton: true, //non mostrare il tasto ok
+				      			  //confirmButtonText: 'Ho capito!'
+			      			      	timerProgressBar: true,
+			      			   /* 	didOpen: () => {
+			      			        	Swal.showLoading()
+			      			        	const b = Swal.getHtmlContainer().querySelector('b')
+			      			        	timerInterval = setInterval(() => {
+			      			          		b.textContent = Swal.getTimerLeft()
+			      			        	}, 100)
+			      			      	}, 
+			      			      	willClose: () => {
+			      			        	clearInterval(timerInterval)
+			      			      	} */
+			      			    }).then((result) => {
+			       			    	if (result.dismiss === Swal.DismissReason.timer) {
+			      			        	console.log('I was closed by the timer')
+			      			      		window.location.href = "dashboard.html";
+			      			      	}
+			      			      	else{
+			      			    		window.location.href = "dashboard.html";
+			      			      	}
+			      			    })     			   	
+ 			       		}
+ 			       		else{ //associazione Nodo Sensore Sensore NON è andata a buon fine      			       			
+	      			       		console.log("result: " + messaggio.result);
+	      			       		console.log("messaggio in else: " + messaggio.messaggio);
+ 			       			let timerInterval
+			      			    Swal.fire({
+			      			    	icon: 'error',
+			      			   // 	title: m,
+			      			    	text: m,
+			      			   //     html: 'I will close in <b>3</b> milliseconds.',
+			      			      	timer: 2000,
+			      				  //showConfirmButton: true, //non mostrare il tasto ok
+				      			  //confirmButtonText: 'Ho capito!'
+			      			      	timerProgressBar: true,
+			      			   /* 	didOpen: () => {
+			      			        	Swal.showLoading()
+			      			        	const b = Swal.getHtmlContainer().querySelector('b')
+			      			        	timerInterval = setInterval(() => {
+			      			          		b.textContent = Swal.getTimerLeft()
+			      			        	}, 100)
+			      			      	}, 
+			      			      	willClose: () => {
+			      			        	clearInterval(timerInterval)
+			      			      	} */
+			      			    }).then((result) => {
+			       			    	if (result.dismiss === Swal.DismissReason.timer) {
+			      			        	console.log('I was closed by the timer')
+			      			      		window.location.href = "dashboard.html";
+			      			      	}
+			      			      	else{
+			      			    		window.location.href = "dashboard.html";
+			      			      	}
+			      			    })       			       		
+ 			       		}
+   			        	      			        	
+   			         },
+   			         error: function (jqXHR, textStatus, errorThrown) {
+   			        	 console.log("ERROREEEE");
+   			        	 alert('<form>State Unavailable</form>');
+   			         },
+   			         cache: false
+   			     });
+   				
+   			   
+   			}); 
+     	  
+     	  
+     	  
+     	  
+     	      
+     	      	
          		
                 
             });
@@ -635,8 +923,19 @@
 		    });
 			*/	
 	
+	
+	
+	
+			
+		
+		
+
+   
+    
+    
     
         </script>
     </body>
 </html>
+
 
