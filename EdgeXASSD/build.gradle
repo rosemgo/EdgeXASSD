@@ -7,7 +7,7 @@ apply plugin: 'war'
 
 // creazione del file war nella cartella build\libs, nella post compilazione di Jenkins viene deployato su Tomcat 
 // War file name 
-war.baseName = 'AsteOnLine'
+war.baseName = 'EdgeXASSD'
 
 //Apply Findbugs inspection plugin
 //apply plugin: 'findbugs'
