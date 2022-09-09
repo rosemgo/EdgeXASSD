@@ -30,7 +30,9 @@ import it.unisannio.rosariogoglia.model.Protocol;
 public class SensorNodeDAO {
 	
 	
-	private static Logger logger = Logger.getLogger(SensorNodeDAO.class);	
+	private static Logger logger = Logger.getLogger(SensorNodeDAO.class);
+	
+		
 	
 	public List<SensorNode> getSensorsNode(){
 		
@@ -140,9 +142,8 @@ public class SensorNodeDAO {
 					logger.debug("SENSORE MQTT");
 				}
 				else if(protocollo.equals("COAP")) {
-					//caricare anche la porta
 					int port = rs.getInt("portServerCOAP");
-					sensorNode = new SensorNodeCOAP();
+					sensorNode = new SensorNodeCOAP(port);
 					logger.debug("SENSORE COAP");
 				} 
 				else if(protocollo.equals("REST")){ //completare con altri protocolli usati dai nodi sensori
@@ -330,8 +331,9 @@ public class SensorNodeDAO {
 		
 	}
 	
+		
 	
-	
+
 	public List<Sensor> getSensorsBySensorNodeID(int sensorNodeId){
 		
 		logger.debug("in getSensorsBySensorNodeID");
@@ -411,7 +413,7 @@ public class SensorNodeDAO {
 				String sql = "INSERT INTO sensornode (deviceName, protocol_idprotocol) VALUES (?, ?)";
 				pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 				pstmt.setString(1, sensorNode.getDevice());
-				pstmt.setInt(2,sensorNode.getProtocollo().getIdProtocol());				
+				pstmt.setInt(2, sensorNode.getProtocollo().getIdProtocol());				
 			}
 						
 			logger.debug("Insert Query: " + pstmt.toString());
@@ -455,7 +457,12 @@ public class SensorNodeDAO {
 
 	
 	// insertSensorNodeHasSensors(idNodoSensore, idSensors);
-	
+	/**
+	 * Metodo usato per associare una lista di sensori al nodo sensore
+	 * @param idNodoSensore
+	 * @param sensorList
+	 * @return
+	 */
 	public Integer updateSensorListBySensorNodeId(Integer idNodoSensore, List<Sensor> sensorList) {
 		logger.debug("in updateSensorListBySensorNodeId");
 		Integer insertRow = -1;
@@ -469,54 +476,78 @@ public class SensorNodeDAO {
 				
 	}
 	
+	/**
+	 * Metodo usato per disassociare il nodo sensore dai sensori ad esso associati
+	 * @param idNodoSensore
+	 * @param sensorList
+	 * @return
+	 */
+	public Integer resetSensorListBySensorNodeId(Integer idNodoSensore) {
+		logger.debug("in resetSensorListBySensorNodeId");
+		Integer insertRow = -1;
+		SensorDAO sDAO = new SensorDAO();
+					
+		insertRow = sDAO.updateSensorReset(idNodoSensore); //associo ogni sensore al nodo sensore scelto
+					
+
+		return insertRow;
+				
+	}
 	
-		/**
-		 * Metodo usato per ottenere il numero di porta, usato per la componente server di un nodo sensore COAP, più grande di quelli presenti.
-		 * @return numero di porta
-		 */
-		public Integer getMaxPortServerCOAP() {
-			logger.debug("in getMaxPortServerCOAP");
-			Integer port = -1;
+	
+	
+	
+	
+	/**
+	 * Metodo usato per ottenere il numero di porta, usato per la componente server di un nodo sensore COAP, più grande di quelli presenti.
+	 * @return numero di porta
+	 */
+	public Integer getMaxPortServerCOAP() {
+		logger.debug("in getMaxPortServerCOAP");
+		ResultSet rs = null;
+		Integer port = -1;
+		Connection connection = null;
+		PreparedStatement  pstmt = null;
+		try {
 			
-			Connection connection = null;
-			PreparedStatement  pstmt = null;
-			try {
+			connection = DatabaseUtil.getConnection();
+			connection.setAutoCommit(false);
+			
+			String sql = "SELECT MAX(portServerCOAP) as max_port FROM sensornode";
+	
+			pstmt = connection.prepareStatement(sql);
+			logger.debug("Query:" + pstmt.toString());
+			rs = pstmt.executeQuery();
+			if(rs.next()) {
 				
-				connection = DatabaseUtil.getConnection();
-				connection.setAutoCommit(false);
+				port=rs.getInt("max_port");	
 				
-				String sql = "SELECT MAX(portServerCOAP) as max_port FROM sensor;";
-		
-				pstmt = connection.prepareStatement(sql);
-				logger.debug("Query:" + pstmt.toString());
-				port = pstmt.executeUpdate();
-								
-				connection.commit();
-				logger.info("Max COAP port: " + port);
-		
-			}catch (SQLException  e1) {
-				e1.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			finally {
-				if (connection!=null) {
-					try {
-						pstmt.close();
-						connection.setAutoCommit(true);
-						connection.close();
-						logger.debug("Connection chiusa");
-					} catch (SQLException  e) {
-						
-						e.printStackTrace();
-					}
+			}				
+			connection.commit();
+			logger.info("Max COAP port: " + port);
+	
+		}catch (SQLException  e1) {
+			e1.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		finally {
+			if (connection!=null) {
+				try {
+					pstmt.close();
+					connection.setAutoCommit(true);
+					connection.close();
+					logger.debug("Connection chiusa");
+				} catch (SQLException  e) {
+					
+					e.printStackTrace();
 				}
 			}
-			return port;
 		}
-		
+		return port;
+	}
 	
 	
 	
