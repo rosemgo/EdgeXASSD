@@ -28,7 +28,7 @@ sourceCompatibility = 1.8
 
 // creazione del file war nella cartella build\libs, nella post compilazione di Jenkins viene deployato su Tomcat
 // War file name
-war.baseName = 'AsteOnLine'
+war.baseName = 'EdgeXASSD'
 
 // Web directory, this overrides the default value "webapp"
 project.webAppDirName = 'WebContent'
@@ -45,29 +45,33 @@ sourceSets {
 
 dependencies {
 
-	 //dipendendenze librerie locali
-	 compile fileTree(dir: 'WebContent/WEB-INF/lib', include: ['*.jar'])
+	//dipendendenze librerie locali
+	compile fileTree(dir: 'WebContent/WEB-INF/lib', include: ['*.jar'])
 	 
-	 //Import di tutte le librerie esterne necessarie
-	 compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.+'
+	//Import di tutte le librerie esterne necessarie
+	compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.+'
 
 	 
-	 //Import MySql connector Java driver
-	 compile group: 'mysql', name: 'mysql-connector-java', version: '5.+'
+	//Import MySql connector Java driver
+	compile group: 'mysql', name: 'mysql-connector-java', version: '5.+'
 
-	 //Import della libreira Http per usare REST
-	 compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.6'
-	 //Thanks for using https://jar-download.com
+	//Import della libreira Http per usare REST
+	compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.6'
+	
 	 
 	 
-	 //Import delle librerie MQTT
-	 implementation group: 'org.eclipse.paho', name: 'org.eclipse.paho.client.mqttv3', version: '1.2.5'
+	//Import delle librerie MQTT
+	implementation group: 'org.eclipse.paho', name: 'org.eclipse.paho.client.mqttv3', version: '1.2.5'
 	
 	//Import JSTL
 	implementation 'javax.servlet.jsp.jstl:jstl:1.2'
+	
+	
+	
+  	implementation "com.influxdb:influxdb-client-java:4.3.0"
+
 	 
 } 
-
 
 
 
