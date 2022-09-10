@@ -25,7 +25,7 @@ repositories {
 }
 
 // JDK version source compatibility
-sourceCompatibility = 1.8
+sourceCompatibility = 11
 
 // project version
 //version = '1.0'

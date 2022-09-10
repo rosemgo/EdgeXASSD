@@ -28,7 +28,7 @@ public class DatabaseUtil {
 		 String jdbcDriver = "com.mysql.jdbc.Driver";
 	     String hostname = "jdbc:mysql://localhost:3306/";
 	     String username = "root";
-	     String password = "root";     
+	     String password = "root"; //cambiare password per database su amazon AWS con quella dell' utente root di mysql server (nome utente: root , password: Rosario7$ o root)      
 	     String database = "sensingDB"; 
 		
 		//Carico il driver JDBC per la connessione con il database MySQL
