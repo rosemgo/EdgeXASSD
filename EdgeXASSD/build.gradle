@@ -30,16 +30,9 @@ sourceCompatibility = 11
 // project version
 //version = '1.0'
 
-// creazione del file war nella cartella build\libs, nella post compilazione di Jenkins viene deployato su Tomcat
-// War file name
-war.baseName = 'EdgeXASSD'
 
 // Web directory, this overrides the default value "webapp"
 project.webAppDirName = 'WebContent'
-
-
-
-
 
 
 //Set source directory, istruisco gradle su dove trovare i file di produzione ed i file di test. Il sourceSets è una struttura di directory che contiene i sorgenti java. Il plugin java ne contiene 2 di default che sono main e test: è stato necessario riscriverli perchè uso la struttura Dynamic Web e non quella standard di un progetto gradle
