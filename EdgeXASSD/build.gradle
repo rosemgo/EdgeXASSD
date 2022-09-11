@@ -10,7 +10,7 @@ apply plugin: 'war'
 war.baseName = 'EdgeXASSD'
 
 war {
-	 println "SONO IN WAR: Copy from ${libsDir.getPath()} into ${tomcatHome}/webapps"
+	println "SONO IN WAR: Copy from ${libsDir.getPath()} into ${tomcatHome}/webapps"
 	enabled=true
     webInf { from 'WebContent/WEB-INF' }
 }
@@ -84,7 +84,7 @@ javadoc {
 	failOnError = false
 }
 
-
+/*
 //deploy in locale del file war in Tomcat
 //la proprietà tomcatHome è stata definita nel file gradle.properties e gradlew.properties che si trovano nella cartella C:\Users\rosar\.gradle
 task deploy (dependsOn: war){
@@ -95,5 +95,5 @@ task deploy (dependsOn: war){
     	into "${tomcatHome}/webapps"
     }
 }
-
+*/
 
