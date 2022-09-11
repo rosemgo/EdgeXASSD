@@ -85,4 +85,15 @@ javadoc {
 }
 
 
+//deploy in locale del file war in Tomcat
+//la proprietà tomcatHome è stata definita nel file gradle.properties e gradlew.properties che si trovano nella cartella C:\Users\rosar\.gradle
+task deploy (dependsOn: war){
+   //def tomcatHome = "C:/Program Files/Apache Software Foundation/Tomcat 9.0"
+    println "Copy from ${libsDir.getPath()} into ${tomcatHome}/webapps"
+    copy {
+    	from war.archivePath
+    	into "${tomcatHome}/webapps"
+    }
+}
+
 
