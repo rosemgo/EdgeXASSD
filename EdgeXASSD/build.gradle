@@ -10,7 +10,7 @@ apply plugin: 'war'
 war.baseName = 'EdgeXASSD'
 
 war {
-	println "SONO IN WAR: Copy from ${libsDir.getPath()} into ${tomcatHome}/webapps"
+	println "SONO IN WAR: ${libsDir.getPath()} "
 	enabled=true
     webInf { from 'WebContent/WEB-INF' }
 }
