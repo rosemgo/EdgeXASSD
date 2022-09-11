@@ -9,6 +9,9 @@ apply plugin: 'war'
 // War file name 
 war.baseName = 'EdgeXASSD'
 
+war {
+    webInf { from 'WebContent/WEB-INF' }
+}
 //Apply Findbugs inspection plugin
 //apply plugin: 'findbugs'
 
