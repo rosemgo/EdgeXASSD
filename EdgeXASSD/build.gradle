@@ -10,6 +10,8 @@ apply plugin: 'war'
 war.baseName = 'EdgeXASSD'
 
 war {
+	 println "SONO IN WAR: Copy from ${libsDir.getPath()} into ${tomcatHome}/webapps"
+	enabled=true
     webInf { from 'WebContent/WEB-INF' }
 }
 //Apply Findbugs inspection plugin
