@@ -55,14 +55,15 @@ dependencies {
 	//dipendendenze librerie locali
 	compile fileTree(dir: 'WebContent/WEB-INF/lib', include: ['*.jar'])
 	
-	implementation 'org.apache.logging.log4j:log4j-api:2.18.0'
-  	implementation 'org.apache.logging.log4j:log4j-core:2.18.0'
   	
   	//Import di tutte le librerie esterne necessarie
   	
   	//Import log4j
   	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.7'
   	compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.7'
+  	
+	implementation 'org.apache.logging.log4j:log4j-api:2.18.0'
+  	implementation 'org.apache.logging.log4j:log4j-core:2.18.0'
   		
   	//Import Javax Servlet	
 	compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.+'
