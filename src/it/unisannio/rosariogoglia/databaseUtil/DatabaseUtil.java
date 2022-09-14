@@ -28,8 +28,9 @@ public class DatabaseUtil {
 		 String jdbcDriver = "com.mysql.jdbc.Driver";
 	     String hostname = "jdbc:mysql://localhost:3306/";
 	     String username = "root";
-	     String password = "root"; //cambiare password per database su amazon AWS con quella dell' utente root di mysql server (nome utente: root , password: Rosario7$ o root)      
-	     String database = "sensingDB"; 
+	     String password = "root";  //cambiare password per database su amazon AWS con quella dell' utente root di mysql server  
+	     String database = "sensoringdb";
+	     String property = "?allowMultiQueries=true"; //consente di eseguire più query concatenate
 		
 		//Carico il driver JDBC per la connessione con il database MySQL
 		Class.forName(jdbcDriver);
@@ -37,7 +38,7 @@ public class DatabaseUtil {
 	
 	//	connection = DriverManager.getConnection(hostname + database, username, password); //Definiamo l'URL per la connessione
 
-		connection = DriverManager.getConnection(hostname + database, username, password); //Definiamo l'URL per la connessione
+		connection = DriverManager.getConnection(hostname + database + property, username, password); //Definiamo l'URL per la connessione
 		
 		return connection;
 		
