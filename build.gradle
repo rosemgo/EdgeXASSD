@@ -70,7 +70,8 @@ dependencies {
 	 
 	//Import MySql connector Java driver
 	compile group: 'mysql', name: 'mysql-connector-java', version: '5.+'
-
+	compile 'mysql:mysql-connector-java:6.0.+'
+	
 	//Import della libreira Http per usare REST
 	compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.6'
 		 
