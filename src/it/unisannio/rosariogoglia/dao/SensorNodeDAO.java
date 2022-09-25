@@ -14,16 +14,12 @@ import org.apache.log4j.Logger;
 import com.google.gson.Gson;
 
 import it.unisannio.rosariogoglia.dao.SensorNodeDAO;
-import it.unisannio.rosariogoglia.dao.ProtocolDAO;
-import it.unisannio.rosariogoglia.dao.SensorDAO;
 import it.unisannio.rosariogoglia.databaseUtil.DatabaseUtil;
 import it.unisannio.rosariogoglia.model.Sensor;
-import it.unisannio.rosariogoglia.model.SensorHumidity;
 import it.unisannio.rosariogoglia.model.SensorNode;
 import it.unisannio.rosariogoglia.model.SensorNodeCOAP;
 import it.unisannio.rosariogoglia.model.SensorNodeMQTT;
 import it.unisannio.rosariogoglia.model.SensorNodeREST;
-import it.unisannio.rosariogoglia.model.SensorTemperature;
 import it.unisannio.rosariogoglia.model.Protocol;
 
 
@@ -43,7 +39,7 @@ public class SensorNodeDAO {
 		ResultSet rs = null;
 		try {
 			connection = DatabaseUtil.getConnection();
-			String query = "SELECT * FROM sensorNode ORDER BY deviceName ASC";
+			String query = "SELECT * FROM sensornode ORDER BY deviceName ASC";
 			pstmt = connection.prepareStatement(query);
 			logger.debug("Select Query: " + query);
 			rs = pstmt.executeQuery(query);
@@ -155,7 +151,7 @@ public class SensorNodeDAO {
 				sensorNode.setDevice(rs.getString("deviceName"));
 				sensorNode.setProtocollo(protocol);				
 				
-				//NOTE BENE CARICO LA LISTA DI SENSORI ASSOCIATI AL NODO SENSORE				
+				//NOTE BENE: CARICO LA LISTA DI SENSORI ASSOCIATI AL NODO SENSORE				
 				sensorNode.setSensors(this.getSensorsBySensorNodeID(sensorNodeId)); 
 			}
 			System.out.println("(" + sensorNode.getIdSensorNode() + ", " + sensorNode.getDevice() + ", " + sensorNode.getProtocollo() + ")");

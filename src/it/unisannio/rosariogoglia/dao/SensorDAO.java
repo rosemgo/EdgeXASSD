@@ -10,8 +10,12 @@ import java.util.List;
 
 import it.unisannio.rosariogoglia.databaseUtil.DatabaseUtil;
 import it.unisannio.rosariogoglia.model.Sensor;
+import it.unisannio.rosariogoglia.model.SensorAmmoniaca;
+import it.unisannio.rosariogoglia.model.SensorAzoto;
 import it.unisannio.rosariogoglia.model.SensorHumidity;
+import it.unisannio.rosariogoglia.model.SensorCarbonio;
 import it.unisannio.rosariogoglia.model.SensorTemperature;
+import it.unisannio.rosariogoglia.model.SensorWindSpeed;
 
 import org.apache.log4j.Logger;
 
@@ -55,9 +59,36 @@ public class SensorDAO {
 					sensor.setType(type);
 					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
 				} 
-				else{ //completare con altre tipologie di sensori
-					
-				}				
+				else if(type.equals("windSpeed")){ //completare con altre tipologie di sensori
+					sensor = new SensorWindSpeed();
+					sensor.setIdSensor(rs.getInt("idsensor"));
+					sensor.setName(rs.getString("name"));
+					sensor.setType(type);
+					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
+				}
+				else if(type.equals("CO")){ //completare con altre tipologie di sensori
+					sensor = new SensorCarbonio();
+					sensor.setIdSensor(rs.getInt("idsensor"));
+					sensor.setName(rs.getString("name"));
+					sensor.setType(type);
+					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
+				}
+				else if(type.equals("NH3")){ //completare con altre tipologie di sensori
+					sensor = new SensorAmmoniaca();
+					sensor.setIdSensor(rs.getInt("idsensor"));
+					sensor.setName(rs.getString("name"));
+					sensor.setType(type);
+					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
+				}
+				else if(type.equals("NO2")){ //completare con altre tipologie di sensori
+					sensor = new SensorAzoto();
+					sensor.setIdSensor(rs.getInt("idsensor"));
+					sensor.setName(rs.getString("name"));
+					sensor.setType(type);
+					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
+				}
+				else {}
+				
 				
 				System.out.println("");
 				
@@ -130,7 +161,35 @@ public class SensorDAO {
 					sensor.setName(rs.getString("name"));
 					sensor.setType(type);
 					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
-				} 
+				}
+				else if(type.equals("windSpeed")){ //completare con altre tipologie di sensori
+					sensor = new SensorWindSpeed();
+					sensor.setIdSensor(rs.getInt("idsensor"));
+					sensor.setName(rs.getString("name"));
+					sensor.setType(type);
+					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
+				}
+				else if(type.equals("CO")){ //completare con altre tipologie di sensori
+					sensor = new SensorCarbonio();
+					sensor.setIdSensor(rs.getInt("idsensor"));
+					sensor.setName(rs.getString("name"));
+					sensor.setType(type);
+					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
+				}
+				else if(type.equals("NH3")){ //completare con altre tipologie di sensori
+					sensor = new SensorAmmoniaca();
+					sensor.setIdSensor(rs.getInt("idsensor"));
+					sensor.setName(rs.getString("name"));
+					sensor.setType(type);
+					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
+				}
+				else if(type.equals("NO2")){ //completare con altre tipologie di sensori
+					sensor = new SensorAzoto();
+					sensor.setIdSensor(rs.getInt("idsensor"));
+					sensor.setName(rs.getString("name"));
+					sensor.setType(type);
+					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
+				}
 				else{ //completare con altre tipologie di sensori
 					
 				}	
@@ -204,7 +263,35 @@ public class SensorDAO {
 					sensor.setName(rs.getString("name"));
 					sensor.setType(type);
 					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
-				} 
+				}
+				else if(type.equals("windSpeed")){ //completare con altre tipologie di sensori
+					sensor = new SensorWindSpeed();
+					sensor.setIdSensor(rs.getInt("idsensor"));
+					sensor.setName(rs.getString("name"));
+					sensor.setType(type);
+					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
+				}
+				else if(type.equals("CO")){ //completare con altre tipologie di sensori
+					sensor = new SensorCarbonio();
+					sensor.setIdSensor(rs.getInt("idsensor"));
+					sensor.setName(rs.getString("name"));
+					sensor.setType(type);
+					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
+				}
+				else if(type.equals("NH3")){ //completare con altre tipologie di sensori
+					sensor = new SensorAmmoniaca();
+					sensor.setIdSensor(rs.getInt("idsensor"));
+					sensor.setName(rs.getString("name"));
+					sensor.setType(type);
+					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
+				}
+				else if(type.equals("NO2")){ //completare con altre tipologie di sensori
+					sensor = new SensorAzoto();
+					sensor.setIdSensor(rs.getInt("idsensor"));
+					sensor.setName(rs.getString("name"));
+					sensor.setType(type);
+					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
+				}
 				else{ //completare con altre tipologie di sensori
 					
 				}
@@ -284,7 +371,35 @@ public class SensorDAO {
 					sensor.setName(rs.getString("name"));
 					sensor.setType(type);
 					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
-				} 
+				}
+				else if(type.equals("windSpeed")){ //completare con altre tipologie di sensori
+					sensor = new SensorWindSpeed();
+					sensor.setIdSensor(rs.getInt("idsensor"));
+					sensor.setName(rs.getString("name"));
+					sensor.setType(type);
+					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
+				}
+				else if(type.equals("CO")){ //completare con altre tipologie di sensori
+					sensor = new SensorCarbonio();
+					sensor.setIdSensor(rs.getInt("idsensor"));
+					sensor.setName(rs.getString("name"));
+					sensor.setType(type);
+					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
+				}
+				else if(type.equals("NH3")){ //completare con altre tipologie di sensori
+					sensor = new SensorAmmoniaca();
+					sensor.setIdSensor(rs.getInt("idsensor"));
+					sensor.setName(rs.getString("name"));
+					sensor.setType(type);
+					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
+				}
+				else if(type.equals("NO2")){ //completare con altre tipologie di sensori
+					sensor = new SensorAzoto();
+					sensor.setIdSensor(rs.getInt("idsensor"));
+					sensor.setName(rs.getString("name"));
+					sensor.setType(type);
+					sensor.setUnitOfMeasurement(rs.getString("unitOfMeasurement"));
+				}
 				else{ //completare con altre tipologie di sensori
 					
 				}
@@ -396,7 +511,7 @@ public class SensorDAO {
 	
 	
 	/**
-	 * Metodo usato dissociare un sensore dal nodo sensore associato. Setta a null la chiave esterna della tabella sensore. Viene inserito l'id del nodo sensore a cui viene associato il sensore.
+	 * Metodo usato per dissociare un sensore dal nodo sensore associato. Setta a null la chiave esterna della tabella sensore. Viene inserito l'id del nodo sensore a cui viene associato il sensore.
 	 * 
 	 * @param sensor
 	 * @param idSensorNode
