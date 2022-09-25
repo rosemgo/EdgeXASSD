@@ -68,7 +68,7 @@ public class ServletCreateSensorNode extends HttpServlet {
 			
 			//messaggio = "Devi inserire un nome valido!";
 			
-			String result = "{\"result\":false,\"messaggio\":\"Devi inserire un nome valido!\",\"redirect\":true,\"redirect_url\":\"dashboard.jsp\"}";
+			String result = "{\"result\":false,\"messaggio\":\"Devi inserire un nome valido!\",\"redirect\":true,\"redirect_url\":\"dashboard.html\"}";
 			JSONObject m = null;
 			try {
 				 m = new JSONObject(result);
@@ -81,10 +81,25 @@ public class ServletCreateSensorNode extends HttpServlet {
 			response.getWriter().write(m.toString());
 		
 			
-		}else if(sensorNodeProtocol==null) {
+		}else if(sensorNodeName.contains(" ")) {
+			
+			String result = "{\"result\":false,\"messaggio\":\"Il nome del Nodo Sensore non può contenere il carattere: spazio!\",\"redirect\":true,\"redirect_url\":\"dashboard.html\"}";
+			JSONObject m = null;
+			try {
+				 m = new JSONObject(result);
+				System.out.println("mess: " +m.toString());
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			response.setContentType("text/plain");
+			response.setCharacterEncoding("UTF-8");
+			response.getWriter().write(m.toString());
+			
+		}
+		else if(sensorNodeProtocol==null) {
 			
 		//	messaggio = "Devi scegliere un protocollo di comunicazione!";
-			String result = "{\"result\":false,\"messaggio\":\"Devi scegliere un protocollo di comunicazione!\",\"redirect\":true,\"redirect_url\":\"dashboard.jsp\"}";
+			String result = "{\"result\":false,\"messaggio\":\"Devi scegliere un protocollo di comunicazione!\",\"redirect\":true,\"redirect_url\":\"dashboard.html\"}";
 			JSONObject m = null;
 			try {
 				 m = new JSONObject(result);
@@ -99,7 +114,7 @@ public class ServletCreateSensorNode extends HttpServlet {
 		}
 		else if(snDAO.checkSensorNodeByNome(sensorNodeName)){ //VERIFICARE SE ESISTE GIà UN DEVICE CON LO STESSO NOME
 		    //messaggio = "Già esiste un nodo sensore con lo stesso nome!";
-			String result = "{\"result\":false,\"messaggio\":\"Già esiste un nodo sensore con lo stesso nome!\",\"redirect\":true,\"redirect_url\":\"dashboard.jsp\"}";
+			String result = "{\"result\":false,\"messaggio\":\"Già esiste un nodo sensore con lo stesso nome!\",\"redirect\":true,\"redirect_url\":\"dashboard.html\"}";
 			JSONObject m = null;
 			try {
 				 m = new JSONObject(result);
@@ -170,7 +185,7 @@ public class ServletCreateSensorNode extends HttpServlet {
 				
 				//invio una richiesta REST al servizio metadata per aggiungere un device ad EdgeX
 				HttpRequest requestEdgeX = HttpRequest.newBuilder()  
-				      	.uri(URI.create("http://15.160.35.22:59881/api/v2/device")) //UTILIZZARE QUESTO INDIRIZZO PER USARE EDGEX SU CLOUD AWS, UTILIZZARE 192.168.204.133 PER USARE EDGEX NELLA MACCHINA VIRTUALE LOCALE
+				      	.uri(URI.create("http://15.160.35.22:59881/api/v2/device")) //UTILIZZARE QUESTO INDIRIZZO (15.160.35.22) PER USARE EDGEX SU CLOUD AWS, UTILIZZARE 192.168.204.133 PER USARE EDGEX NELLA MACCHINA VIRTUALE LOCALE
 						.timeout(Duration.ofMinutes(2))
 				        .header("Content-Type", "application/json")
 				        .POST(BodyPublishers.ofString( deviceEdgeX )) //BodyPublisher converte un oggetto java di alto livello in un flusso di dati
