@@ -24,13 +24,19 @@ public class DatabaseUtil {
         String password = properties.getProperty("password");     
         String database = properties.getProperty("database");     
  */       
-		
+		//utilizza il servizio mysql SAAS Amazon RDS (MySql 5.7)
+		 String hostnameMySqlRDSAmazon = "jdbc:mysql://ros-mysql.cxajrtljcxhc.eu-south-1.rds.amazonaws.com:33000/"; 
+		 //utilizza il servizio mysql installato nell'istanza EC2 di Amazon (MySql 5.7 di Ubuntu 18)
+		 String hostnameMySqlEC2Amazon = "jdbc:mysql://ec2-15-160-35-226.eu-south-1.compute.amazonaws.com:3306/"; //posso usare l'indirizzo 15.160.35.226:3306 
+		 String hostnameLocal = "jdbc:mysql://localhost:3306/"; //UTILIZZANDO localhost:3306 COME INDIRIZZO E' IMPORTANTE CHE IL DATABASE MySQL SIA SULLA STESSA MACCHINA DOVE E' PRESENTE TOMCAT (OSSIA IL WEB SERVER SU CUI E' DEPLOYATA L'APP)
+		 
 		 String jdbcDriver = "com.mysql.jdbc.Driver";
-	     String hostname = "jdbc:mysql://localhost:3306/";
-	     String username = "root";
-	     String password = "root";  //cambiare password per database su amazon AWS con quella dell' utente root di mysql server  
+	     //jdbc:driver://hostname:port/dbName?user=userName&password=password
+		 String hostname = hostnameMySqlRDSAmazon;
+	     String username = "admin";
+	     String password = "rosariomarcofrancesco";  //cambiare password per database su amazon AWS con quella dell' utente root di mysql server  
 	     String database = "sensoringdb";
-	     String property = "?allowMultiQueries=true"; //consente di eseguire più query concatenate
+	     String property = "?allowMultiQueries=true"; //consente di eseguire più query concatenate, mi serve per Resettare un Sensor Node nel metodo "updateSensorReset(Integer idSensorNode)" 
 		
 		//Carico il driver JDBC per la connessione con il database MySQL
 		Class.forName(jdbcDriver);
