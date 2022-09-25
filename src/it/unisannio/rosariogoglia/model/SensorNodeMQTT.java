@@ -27,7 +27,7 @@ public void run(){
 		String broker = "tcp://15.160.35.22:1883"; //USARE QUESTO INDIRIZZO PER EDGEX SU CLOUD AWS
 		String commandTopic = "command/"+ this.device +"/#"; //cambiare con CommandTopic   
 		String responseTopic = "command/response/"+ this.device +"/"; //cambiare con ResponseTopic 
-		String dataTopic = "incoming/data/" + this.device +"/";
+		String dataTopic = "incoming/data/" + this.device +"/"; //this.device è il nome del Nodo Sensore, e deve coincidere con il NameDevice interno ad EdgeX
 		int qos = 1;
 		String clientId= this.device + this.idSensorNode;
         MemoryPersistence persistence = new MemoryPersistence();
@@ -171,9 +171,9 @@ public void run(){
 	            					    	
 				    	JSONObject jsonmsg = new JSONObject();
 				    	jsonmsg.put("idSensorNode", this.idSensorNode); 
-				    	jsonmsg.put("nameNode", this.device); //nome del sensore appartenente al nodo sensore
+				    	jsonmsg.put("nameNode", this.device); //nome del Sensor NODO che deve coincidere con il nome del Device in terno ad EdgeX 
 				    	jsonmsg.put("idSensor", this.sensors.get(i).getIdSensor()); 
-				    	jsonmsg.put("nameSensor", this.sensors.get(i).getName()); 
+				    	jsonmsg.put("nameSensor", this.sensors.get(i).getName()); //nome del sensore appartenente al nodo sensore
 				    	jsonmsg.put("type", this.sensors.get(i).getType()); 
 				    	jsonmsg.put("value", this.sensors.get(i).measurement());
 				    	jsonmsg.put("unitOfMeasurement", sensors.get(i).getUnitOfMeasurement());
