@@ -509,10 +509,12 @@ public class SensorNodeDAO {
 			connection = DatabaseUtil.getConnection();
 			connection.setAutoCommit(false);
 			
-			String sql = "SELECT MAX(portServerCOAP) as max_port FROM sensornode";
+			//COALESCE restituisce il massimo valore se c'è, oppure se è null restituisce 0
+			String sql = "SELECT COALESCE(MAX(portServerCOAP),0) as max_port FROM sensornode";
 	
 			pstmt = connection.prepareStatement(sql);
 			logger.debug("Query:" + pstmt.toString());
+			
 			rs = pstmt.executeQuery();
 			if(rs.next()) {
 				
@@ -521,6 +523,7 @@ public class SensorNodeDAO {
 			}				
 			connection.commit();
 			logger.info("Max COAP port: " + port);
+			System.out.println("PORTA MAX : " + port );
 	
 		}catch (SQLException  e1) {
 			e1.printStackTrace();

@@ -52,7 +52,7 @@ public class ServletAjaxAssociateSensorToNode extends HttpServlet {
             
             if (op.equals("sensorNode")) {
             	System.out.println("IN SENSOR NODE");
-               //List<SensorNodeSimply> snlist = snDAO.getSensorsNodeSimply();
+                //List<SensorNodeSimply> snlist = snDAO.getSensorsNodeSimply();
                 List<SensorNode> snlist = snDAO.getSensorsNode();
                 for(int i=0; i<snlist.size(); i++) {
                 	System.out.println("SENSORNODE: " + snlist.get(i).toString());

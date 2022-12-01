@@ -180,9 +180,7 @@ public class ServletAssociateSensorToNode extends HttpServlet {
 	        String resultF = "";
 			int insertRow = -1;
 			
-			//ASSOCIO LA LISTA DI SENSORI AL NODO SENSORE NEL DATABASE
-		//	insertRow = snDAO.insertSensorNodeHasSensors(idNodoSensore, idSensors);
-				
+			//ASSOCIO LA LISTA DI SENSORI AL NODO SENSORE NEL DATABASE				
 			insertRow = snDAO.updateSensorListBySensorNodeId(idNodoSensore, idSensors);
 			System.out.println("INSERT ROW: " + insertRow);
 			if(insertRow != -1){		
@@ -198,7 +196,7 @@ public class ServletAssociateSensorToNode extends HttpServlet {
 				SensorNode sensorNode = snDAO.getSensorNodeByID(idNodoSensore); //sto caricando il nodo sensore con tutti i sensori associati
 				System.out.println("SENSOR NODE TROVATO: " + sensorNode.toString());
 				
-				
+				//************************ CREAZIONE THREAD MONITORING RELATIVO AL NODO SENSORE *********
 				//inserire il thread in un mappa statica fatta di chiave id del nodo sensore e valore il thread in modo da ricordarsi tutti i thread avviati e se viene effettuato un cambiamento al nodo sensore bisogna arrestare il thread. 
 				ServletContext context = getServletContext();
 			    Map<Integer, Thread> mapThread = (Map<Integer, Thread>) context.getAttribute("mapThread");
@@ -208,7 +206,8 @@ public class ServletAssociateSensorToNode extends HttpServlet {
 			    if(mapThread.get(sensorNode.getIdSensorNode()) != null) {
 			    	Integer idSensorNodeToKill = sensorNode.getIdSensorNode();
 			    	try{ 
-			    		mapThread.get(idSensorNodeToKill).interrupt(); //ammazzo il thread	    	
+			    		mapThread.get(idSensorNodeToKill).interrupt(); //ammazzo il thread
+			    		System.out.println("THREAD UCCISO: " + idSensorNodeToKill);
 			    	}catch(Exception e){System.out.println("Exception handled "+e);}
 			    } 		
 				

@@ -82,7 +82,7 @@ public class Measurement {
 	}
 		
 	public String toString() {
-		return ("idMeasurement: " + this.idMeasurement + ", value: " + this.value + ", idSensorNode: " + this.idSensorNode + ", idSensor: " + this.idSensor);
+		return ("idMeasurement: " + this.idMeasurement + ", value: " + this.value + ", idSensorNode: " + this.idSensorNode + ", idSensor: " + this.idSensor + ", data: " + this.dateMeasurement);
 	}
 	
 

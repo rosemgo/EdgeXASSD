@@ -39,7 +39,7 @@ public class ServletSensorMonitoring extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
 		
-		System.out.println("SONO IN SENSOR MONITORING");		
+	//	System.out.println("SONO IN SENSOR MONITORING");		
 		
 		Integer idNodoSensore = null;
 		Integer idSensor1= null;
@@ -68,29 +68,35 @@ public class ServletSensorMonitoring extends HttpServlet {
 			System.out.println("POST ID 0");
 			//********** E' LA PRIMA RICHIESTA EFFETTUATA DI MONITORAGGIO DEL SENSORE, SOLO IN QUESTO CASO E' NECESSARIO OTTENERE TUTTE 
 			//LE MISURAZIONI PRESENTI NELLA TABELLA FINO A QUEL MOMENTO ED INSERIRLE NEL GRAFICO
+			
+			//CON QUESTO METODO OTTENIAMO LE ULTIME 200 MISURAZIONI
 			measurementList = mDAO.getMeasurementListBySensorID(idSensor1);
 				
+			//CON QUESTO METODO OTTENIAMO TUTTA LA STORIA DELLE MISURAZIONI DI UN SENSORE
+			//measurementList = mDAO.getAllMeasurementListBySensorID(idSensor1);
 			
 		}
 		else {
 			
-			System.out.println("POST ID > 0");
+	//		System.out.println("POST ID > 0");
 			
 			//********* EFFETTUARE UNA SINGOLA LETTURA NEL DB. LEGGERE LA TUPLA CORRISPONDENTE ALLA MISURAZIONE NUMERO PARI AL VALORE DI POSTID. 
-			Measurement measurement = mDAO.getMeasurementByIdSensor(idSensor1, postId);
-			measurementList.add(measurement); //lista di una sola misurazione
+			measurementList = mDAO.getMeasurementByIdSensor(idSensor1, postId);
 			
-			if(measurement != null)
-				System.out.println("SINGOLA MISURAZIONE: " + measurement.toString());
-			
+						
+//			if(measurement != null) {
+//				System.out.println("SINGOLA MISURAZIONE: " + measurement.toString());
+//				//System.out.println("DATA DELLA MISURAZIONE: " + measurement.getDateMeasurement());
+//			}
 		}
 
-		System.out.println("MEASUREMENT LIST: ");
+	/*
+	 	System.out.println("MEASUREMENT LIST: ");
 		for(int i=0; i<measurementList.size(); i++) {
 			if(measurementList.get(i) != null)
 			System.out.println("MEASUREMENT " + i + " : " + measurementList.get(i).toString());
 		}                
-		
+	*/	
 
 		
 		
@@ -98,7 +104,7 @@ public class ServletSensorMonitoring extends HttpServlet {
 	   	 
        Gson json = new Gson();
        String measurementListFinal = json.toJson(measurementList);
-       System.out.println("SENSOR NODE LIST: " + measurementListFinal);
+ //    System.out.println("SENSOR NODE LIST: " + measurementListFinal);
        response.setContentType("text/html");
        response.getWriter().write(measurementListFinal);    
 			

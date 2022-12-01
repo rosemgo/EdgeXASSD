@@ -4,7 +4,12 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -45,20 +50,17 @@ public class MOMExportDataCloud extends Thread{
 		String clientId= "MOM InfluxDB Cloud";
 	    MemoryPersistence persistence = new MemoryPersistence();
 	     
-	    
+	    //*** BLOCCO DI CODICE NECESSARIO PER CONFIGURARE L'ACCESSO AD INFLUX DB ***
 	    // You can generate an API token from the "API Tokens Tab" in the UI
 	    // String token = System.getenv("QV_kNbM52QA8yTWUgsVyZ7cARaCSbOti5IESfyB9NludugSjSdfpqSQOXLBoRnU8aYyfFv7AAOVK2gjdODFudg==");
-	    
 	    //TOKEN UNICO
 	    // String token = "QV_kNbM52QA8yTWUgsVyZ7cARaCSbOti5IESfyB9NludugSjSdfpqSQOXLBoRnU8aYyfFv7AAOVK2gjdODFudg==";
 	    //   System.out.println("token: " + token);
-	       
-	       String token = "wmCu42trECNPDIUeLRqqbn2i50YEkGvZ7aPFvuR6M-nDkDpX5pCqK0raQdL3lkIU1QcRsJzjSPcnS7AR_yPhyA==";
-	       
-	       String bucket = "EdgeX-SensorNode-Monitoring";
-	       String org = "rosariogoglia@gmail.com";
+	     String token = "wmCu42trECNPDIUeLRqqbn2i50YEkGvZ7aPFvuR6M-nDkDpX5pCqK0raQdL3lkIU1QcRsJzjSPcnS7AR_yPhyA==";
+	     String bucket = "EdgeX-SensorNode-Monitoring";
+	     String org = "rosariogoglia@gmail.com";
 
-	       InfluxDBClient client = InfluxDBClientFactory.create("https://eu-central-1-1.aws.cloud2.influxdata.com", token.toCharArray());
+	     InfluxDBClient client = InfluxDBClientFactory.create("https://eu-central-1-1.aws.cloud2.influxdata.com", token.toCharArray());
 	   
 	    
 	      try { 
@@ -93,7 +95,7 @@ public class MOMExportDataCloud extends Thread{
 		            	System.out.println("Messaggio ricevuto: " + topic + ": " + new String(message.getPayload()) ); //converte il payload del messaggio in stringa     
 		            	
 		                JSONObject jsonmsg = new JSONObject(new String(message.getPayload()));
-		                System.out.println("Messaggio json RICEVUTO: " + jsonmsg);
+		//               System.out.println("Messaggio json RICEVUTO: " + jsonmsg);
 		                
 		              /*JsonObject jsobj = new JsonObject();
 		                Gson jsob = new Gson();
@@ -102,36 +104,72 @@ public class MOMExportDataCloud extends Thread{
 		                	                
 		              //"readings" è un array di un solo elemento
 		                JSONObject readings = jsonmsg.getJSONArray("readings").getJSONObject(0); //l'array reading è costituito da un solo elemento con più campi
-		                System.out.println("readings: " + readings);
+		//                System.out.println("readings: " + readings);
 		                
 		              // valueReading contiene il campo value o objectValue che contiene la misurazione effettuata da ogni sensore associato al nodo: -->
 		              // --> "objectValue":"[{\"nameSensor\":\"TEMPERATURA 1\",\"data\":\"Sat Jul 23 14:10:26 CEST 2022\",\"type\":\"temperature\",\"value\":39.622178153642984,\"nameNode\":\"DeviceMQTT\"},{\"nameSensor\":\"TEMPERATURA 2\",\"data\":\"Sat Jul 23 14:10:26 CEST 2022\",\"type\":\"temperature\",\"value\":9.591273316256629,\"nameNode\":\"DeviceMQTT\"},{\"nameSensor\":\"TEMPERATURA 3\",\"data\":\"Sat Jul 23 14:10:26 CEST 2022\",\"type\":\"temperature\",\"value\":-2.2434264189229687,\"nameNode\":\"DeviceMQTT\"}]","id":"aa32a430-3358-416f-8450-f08732ae13f6","deviceName":"DeviceMQTT","value":""}]
-		                String valueReadingsString = null; 
-		                if(readings.getString("value").equals("")) { //i messaggi inviati con protocollo MQTT e REST hanno il campo 'value' vuoto, ed il campo 'objectValue' contiene il messaggio
+		                String valueReadingsString = null;
+		                //DIPENDE DAL DEVICE-PROFILE UTILIZZATO IN PER I VARI PROTOCOLLI. SE LA RISOLRA JSON NEL PROFILO (description: JSON message) HA UN valueType: Object, IL MESSAGGIO INVIATO AD EDGEX AVRA IL CAMPO value VUOTO ED IL CAMPO valueObject CONTERRA' IL MESSAGGIO 
+		                if(readings.getString("value").equals("")) { //in base al setting del device-profile si può avere il campo 'value' vuoto, ed il campo 'objectValue' contiene il messaggio
 		                	
 		                	JSONArray objectValue = readings.optJSONArray("objectValue"); //restituisce null se objectValue non è un array
                 	        
 		                	if(objectValue!=null) { 
 		                		//è un array
-		                		System.out.println("objectValue è un JSONarray");
+		//                		System.out.println("objectValue è un JSONarray");
 	                	        valueReadingsString = objectValue.toString();
 		                	}
 		                	else {
-		                		System.out.println("objectValue è un JSONobject");
+		//                		System.out.println("objectValue è un JSONobject");
                 	    		valueReadingsString = readings.getString("objectValue");
-    		                	System.out.println("ObjectValue: " + valueReadingsString);		                		
+    	//	                	System.out.println("ObjectValue: " + valueReadingsString);		                		
 		                	}        		
 	
 		                }
-		                else { 
+		                else { //CON PROTOCOLOLLO COAP LE MISURAZIONI SONO INSERITE NEL CAMPO VALUE
 		                	valueReadingsString = readings.getString("value");
-		                	System.out.println("Value: " + valueReadingsString);
+		//                	System.out.println("Value: " + valueReadingsString);
 		                }
 		                
-		                JSONArray valueReadingsJson = new JSONArray(valueReadingsString);//N.B. TRASFORMO IN JSON SOLO IL CAMPO objectValue/Value
-		                System.out.println("Array Value Json: " + valueReadingsJson);
+		                JSONArray valueReadingsJson = new JSONArray(valueReadingsString); //N.B. TRASFORMO IN JSON SOLO IL CAMPO objectValue/Value
+	//	                System.out.println("Array Value Json: " + valueReadingsJson);
 		                
+	//	                System.out.println("CI ARRIVO");
+		           
+		                //DEVO SCORRERE UNA PRIMA VOLTA L'ARRAY valueReadingsJson PER TROVARE LA DATA
+		                String date = null;
+		                Timestamp dateDB = null;
+		                boolean findDate = false;
+		                for(int i=0; (i<valueReadingsJson.length() && !findDate); i++) {
+		                	JSONObject sensorValue = valueReadingsJson.getJSONObject(i);
+		                	if(sensorValue.has("date")) {
+		                		date = sensorValue.getString("date");
+		                		findDate=true;
+		                		
+		                		//CONVERTO LA DATA NEL FORMATO IDONEO PER DATETIME NEL DB MySql
+		                		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"); //INDICO IL VALORE INIZIALE DELLA DATA
+		            		    DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); //FORMATO IN CUI TRASFORMO LA DATA PER INSERIRE NEL DATABASE --> IN MySql il formato DATETIME è yyyy-MM-dd HH:mm:ss
+		            		    String dateString = LocalDateTime.parse(date, formatter).format(formatter2);
+		            		    //CONVERTO LA DATA OTTENUTA SOTTOFORMA DI STRINGA IN DATE JAVA PER POTERLA TRASFORMARE IN TIMESTAMP PER IL DATABASE 
+		            		    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		            		    java.util.Date dateD;
+								try {
+									dateD = dateFormat.parse(dateString);
+									System.out.println(dateD);
+									//CREO LA DATA PER IL DATABASE MySQL
+									dateDB = new java.sql.Timestamp(dateD.getTime());
+									
+								} catch (ParseException e1) {
+									e1.printStackTrace();
+								}
+		                		
+		//                		System.out.println("LA DATA IN MYSQL è: " + dateDB);
+		                	}
+		                }
 		                
+		               
+		                
+		                //DEVO SCORRERE UNA SECONDA VOLTA L'ARRAY valueReadingsJson PER INSERIRE LE MISURAZIONI NEL DATABASE
 		                //ESTRAGGO DALL'ARRAY valueReading LA MISURAZIONE DI OGNI SINGOLO SENSORE
 		                //{\"nameSensor\":\"TEMPERATURA 1\",\"data\":\"Sat Jul 23 14:10:26 CEST 2022\",\"type\":\"temperature\",\"value\":39.622178153642984,\"nameNode\":\"DeviceMQTT\"}
 		                for(int i=0; i<valueReadingsJson.length(); i++) {
@@ -139,7 +177,7 @@ public class MOMExportDataCloud extends Thread{
 		                	
 		                	if(!sensorValue.has("date")) {
 		                	
-			                	System.out.println("Singola lettura: " + sensorValue);
+		//	                	System.out.println("Singola lettura: " + sensorValue);
 			                	
 			                	Integer idSensorNode = sensorValue.getInt("idSensorNode");
 			                	String nameSensorNode = sensorValue.getString("nameNode");
@@ -148,32 +186,32 @@ public class MOMExportDataCloud extends Thread{
 				                String type = sensorValue.getString("type");
 				                String unitOfMeasurement = sensorValue.getString("unitOfMeasurement");
 				                Float value = (float) sensorValue.getDouble("value"); 
-				                System.out.println("Valore: " + value);
-				                System.out.println("nameSensor: " + nameSensor);
-				                System.out.println("NameSensorNode: " + nameSensorNode);
-				                System.out.println("Type: " + type);
-				                System.out.println("Unit Of Measurement: " + unitOfMeasurement);
+//				                System.out.println("Valore: " + value);
+//				                System.out.println("nameSensor: " + nameSensor);
+//				                System.out.println("NameSensorNode: " + nameSensorNode);
+//				                System.out.println("Type: " + type);
+//				                System.out.println("Unit Of Measurement: " + unitOfMeasurement);
 				             
 				                //EFFETTUO LA SCRITTURA NEL DATABASE INFLUX DB				                
 		                	
-	//			                Point point = Point
-	//				              		  .measurement(nameSensorNode)
-	//				              		  .addTag("host", clientId)
-	//				              		  .addTag("Sensor Node", nameSensorNode)
-	//				              		  .addTag("Sensor", nameSensor)
-	//				              		  .addTag("type", type)
-	//				              		  .addField(type, value) //value prelevato dal messaggio pubblicato nel topic
-	//				              		  .time(Instant.now(), WritePrecision.NS);
-	//				              
-	//				              //creare più point, uno per ogni dato del sensore specifico
-	//				              WriteApiBlocking writeApi = client.getWriteApiBlocking();
-	//				              writeApi.writePoint(bucket, org, point);    
-	//				      
-	//				              System.out.println("SCRIVO IN INFLUXDB");
+				                Point point = Point
+					              		  .measurement(nameSensorNode)
+					              		  .addTag("host", clientId)
+					              		  .addTag("Sensor Node", nameSensorNode)
+					              		  .addTag("Sensor", nameSensor)
+					              		  .addTag("type", type)
+					              		  .addField(type, value) //value prelevato dal messaggio pubblicato nel topic
+					              		  .time(Instant.now(), WritePrecision.NS);
+					              
+					              //creare più point, uno per ogni dato del sensore specifico
+					              WriteApiBlocking writeApi = client.getWriteApiBlocking();
+					              writeApi.writePoint(bucket, org, point);    
+					      
+					              System.out.println("HO SCRITTO IN INFLUXDB");
 					              
 					                         
 					              //SCRITTURA NEL DATABASE LOCALE 
-					                
+				                System.out.println("CONNESSIONE AL DB LOCALE IN MOMEXPORT");
 					              Connection connection = DatabaseUtil.getConnection(); 
 					              connection.setAutoCommit(false);	
 					              
@@ -182,21 +220,24 @@ public class MOMExportDataCloud extends Thread{
 					              pstmt.setFloat(1, Float.valueOf(value));
 					              pstmt.setString(2, unitOfMeasurement);
 					              pstmt.setString(3, type);
-					              pstmt.setDate(4, new java.sql.Date(new Date().getTime()));
+					          //  pstmt.setDate(4, new java.sql.Date(new Date().getTime()));
+					              pstmt.setTimestamp(4, dateDB);
 					              pstmt.setInt(5, Integer.valueOf(idSensorNode));
 					              pstmt.setInt(6, Integer.valueOf(idSensor));
 					             				             
-					              
-					              System.out.println(pstmt);
+			//		              System.out.println("PRIMA DELLA SCRITTURA NEL DB");
+			//		              System.out.println(pstmt);
 					              
 					              int insertRows = pstmt.executeUpdate();
-					      		  System.out.println("righe inserite: "+ insertRows);
+			//		      		  System.out.println("righe inserite: "+ insertRows);
 					      		  connection.commit();
 				             
 		                	}
-		                	else
-		                		System.out.println("DATA : " + sensorValue.get("date"));
+		                	else {
+		                		//System.out.println("DATA : " + sensorValue.get("date"));
 		                	}
+		                	
+		                }
      
 		            }
 		        
@@ -210,6 +251,9 @@ public class MOMExportDataCloud extends Thread{
 				
 				sampleClient.subscribe(topic, 1); // subscribe al topicCommand con QoS = 1
 				
+				
+				
+							
 	      	} catch (MqttSecurityException e) {
 				e.printStackTrace();
 			} catch (MqttException e) {

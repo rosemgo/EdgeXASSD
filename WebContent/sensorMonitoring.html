@@ -13,7 +13,7 @@
         	.header {
 			  overflow: hidden;
 			  background-color: #f1f1f1;
-			  padding: 20px 10px;
+			  padding: 10px 10px;
 			}
 			
 			/* Style the header links */
@@ -32,6 +32,9 @@
 			.header a.logo {
 			  font-size: 25px;
 			  font-weight: bold;
+			  background: url('logo200X70.png');
+			  width: 200px; 
+			  height: 70px;
 			}
 			
 			/* Change the background color on mouse-over */
@@ -49,6 +52,7 @@
 			/* Float the link section to the right */
 			.header-right {
 			  float: right;
+			  padding: 10px 10px;
 			}
 			
 			/* Add media queries for responsiveness - when the screen is 500px wide or less, stack the links on top of each other */
@@ -172,7 +176,7 @@
 </head>
 <body>
 			<div class="header">
-				<a href="#default" class="logo">LogoEdgeXASSD</a>
+				<a class="logo" href="dashboard.html"></a>
 				<div class="header-right">
 					<a class="active" href="dashboard.html">Home</a>
 					<a href="sensorMonitoring.html">Monitoraggio Sensori</a>
@@ -204,6 +208,14 @@
 	                    <div class="center">
 	                        <input class="btn" type="button" value="Monitoring" id="buttonMonitoring">
 	                    </div>
+	                    
+	                    <p></p>
+	                    
+	                    <div class="center">
+	                        <input class="btn" type="button" value="Command" id="buttonCommand">
+	                    </div>
+	                    
+	                    
 	                </form>
 	                
 	    <!--      	<p>&nbsp;</p>
@@ -215,7 +227,8 @@
 	                
 	          </div>
 		
-		      <div style="width:100%;"> 
+		      <div style="width: 100%; height: 100%;"> 
+		         
 		         <canvas id="mycanvas"></canvas>
 		         		        
 		      </div>
@@ -305,18 +318,31 @@
 			    }]
 			  },
 			  options: {
-			    responsive: true,
-			    
+			    responsive: true,			    
 			    legend: {
 			      display: false
 			    },
+			    data: {
+				    labels: {
+	                    font: {
+	                        size: 1
+	                    }
+	                }
+			    },
 			    scales: {
+			    	x: {
+			            ticks: { //REGOLO LA DIMENSIONE IN PX DELLE LABEL SULL'ASSE DELLE X
+			              font: {
+			                size: 7
+			              }
+			            }
+			    	},
 			    	y: {
 		                beginAtZero: true
 		            }
 			    },
 			    
-			//  scales: scales,
+			
 			    plugins: {
 			      zoom: zoomOptions,
 			      title: {
@@ -374,7 +400,7 @@
                     console.log("SENSOR NODE ID: " + sensorNodeid);
                     let data = {
                         operation: "sensor1",
-                        idSensorNode: sensorNodeid //INVIO ANCHE L'ID DEL NODO SENSORE
+                        idSensorNode: sensorNodeid //INVIO L'ID DEL NODO SENSORE
                     }; 
                     
                     $.ajax({
@@ -408,10 +434,13 @@
 			
 			//FACCIO PARTIRE LA FUNZIONE SULLA PRESSIONE DI UN TASTO OK CHE CONFERMA LA SCELTA DEL SENSORE DA MONITORARE
 		//	$('#sensorNode').change(function () {
-	
+	var sensorNodeMonitoring = null; //indica il NodoSensore che viene monitorato
 	var sensorMonitoring = null; //indica il sensore che viene monitorato
 	var IDThreadInterval = null; //id prodotto dalla funzione setInterval		
 	console.log("MYINTERVAL: " + IDThreadInterval);		
+	
+	//variabile utilizzata per indicare se è in corso il monitoraggio di un sensore
+	var monitoring = false;
 	
 	//FUNZIONE CLIC BOTTOM MONITORING SENSOR NODE
       $('#buttonMonitoring').click(function () {	 
@@ -424,8 +453,7 @@
     	console.log("SENSOR NODE ID: " + sensorNodeid);
     	let sensor1id = $('#sensor1').val(); //sensore scelto dall'utente per essere monitorato
     	console.log("SENSOR 1 ID: " + sensor1id);
-     	
-    	
+     	    	
     	//L'UTENTE NON HA SCELTO UN NODO SENSORE VALIDO
     	if(sensorNodeid == "Select Sensor Node"){    		
     		//INSERIRE IL POPOUT DI ERRORE
@@ -480,10 +508,14 @@
 	    	//NON DEVO AGGIORNARE IL GRAFICO
 	    	//METTERE UN IF ED USARE DELLE VARIABILI CHE MEMORIZZANO IL PRECEDENTE VALORE DI SENSORID, E SE SENSORID NON è CAMBIATO, NON FARE NULLA
 	    	
-	    	if( sensor1id != sensorMonitoring ){ //L'UTENTE HA SCELTO UN NUOVO SENORE DA MONITORARE, AGGIORNIAMO IL GRAFICO CON I NUOVI VALORI
+	    	if( sensor1id != sensorMonitoring ){ //L'UTENTE HA SCELTO UN NUOVO SENSORE DA MONITORARE, AGGIORNIAMO IL GRAFICO CON I NUOVI VALORI
 	    	     	  
 	    	  sensorMonitoring = sensor1id; //setto il sensore che viene monitorato 
-	    		
+	    	  sensorNodeMonitoring = sensorNodeid; //setto il NodoSensore che viene monitorato
+	    	  //variabile booleana per indicare che il monitoring è avviato
+	    	  monitoring = true;
+	    	  console.log("MONITORING DEVE DIVENTARE TRUE: " +monitoring);
+	    	  
 	    	  
 	    	  //MOSTRARE UN AVVISO CHE INDICHI ALL'UTENTE CHE GIA' STA MONITORNANDO IL SENSORE
 	    		
@@ -544,8 +576,7 @@
 	 				   //   console.log("Measurement List: " + data);
 	                      let measurementList = $.parseJSON(data);
 	                   //   console.log("measurementList: " + measurementList);	
-	 				   		
-	                   	 
+	 				   		       	 
 					      
 	 				      //VALUTARE SE IL DATO PASSATO E' VUOTO (IL SENSORE NON HA PRODOTTO NUOVE MISURAZIONI) NON DEVO AGGIORNARE IL GRAFICO
 					      if(measurementList != ""){
@@ -555,30 +586,36 @@
 	 				      	  console.log("First Measurement: " + firstElement.idMeasurement);
 	 				      	  console.log("First Measurement: " + firstElement.type);
 	 				      	  console.log("First Measurement: " + firstElement.unitOfMeasurement);
-					    	  
+	 				      	  
 	 				      	  //"Monitoring sensor: " + idSensore1 + ", type: " + firstElement.type + ", unit of measurement: " + firstElement.unitOfMeasurement + ";
 	 				      	  myChart.options.plugins.title.text =  "Monitoring SensorID: " + sensor1id + ", Type: " + firstElement.type + ", Unit Of Measurement: " +firstElement.unitOfMeasurement;
 	 				      	  myChart.data.datasets[0].label = "" + firstElement.unitOfMeasurement ;
 	 				      	 				      	  
 	 				      	  
 					    	  //for che scorre tutta la lista di misurazioni ed aggiorna il grafico
-					    	  $.each(measurementList, function (key, value) {	
+					    	  $.each(measurementList, function (key, value) {	 //value indica il singolo elemento della lista di misurazioni, quindi una "Measurement"
 		                    	//  console.log("value idmeasurement: " + value.idMeasurement);
 		                        //	console.log("value measurement: " + value.value);
-		                        	//incrementare post prima dell'aggiornamento del grafico
-		                        	postId = postId + 1;
-		                        	myChart.data.labels.push("Value " + postId);
+		                        //  console.log("DATA measurement: " + value.dateMeasurement);
+		                        
+		                        //incrementare post prima dell'aggiornamento del grafico
+		                        //	postId = postId + 1;
+									postId = value.idMeasurement;
+		                        	myChart.data.labels.push("" + value.dateMeasurement);
+		                       // 	myChart.data.labels.push("" + value.dateMeasurement + ", Value " + postId);
+		                       
 		                        //	console.log("POSTID DOPO AGGIORNAMENTO: " + postId);
-		                        	myChart.data.datasets[0].data.push(  value.value  ); //INSERISCO IL VALORE MISURATO DAL SENSORE CHE NEL DB SI CHIAMA value
+		                        	myChart.data.datasets[0].data.push(  value.value  ); //INSERISCO IL VALORE MISURATO DAL SENSORE CHE NELL'OGGETTO measurement SI CHIAMA value (campo della classe Measurement)
 		                        	myChart.update(); 
 		                          
 					    	  });
-					    	  
+
+					    	  console.log("VALORE DI POSTE ID ALLA FINE: " + postId);
 						      	
 					      }
 					      else{
-						      //NON AGGIORNARE IL GRAFICO
-						      console.log("LISTA VUOTA, NON AGGIORNO IL GRAFICO")
+						      //NON AGGIORNARE IL GRAFICO PERCHè NEI SECONDI PASSATI NON CI SONO STATE NUOVE MISURAZIONI
+						    //  console.log("LISTA VUOTA, NON AGGIORNO IL GRAFICO")
 					      }
 					    	
 	
@@ -594,7 +631,7 @@
 					};
 				
 				//setInterval ogni 3 secondi richiama la funzione getData
-				IDThreadInterval = setInterval(getData, 3000); 
+				IDThreadInterval = setInterval(getData, 1000); 
 				console.log("MY INTERVAL ALLA FINE: " + IDThreadInterval)
 	    	}
 	    	else{
@@ -621,6 +658,109 @@
     	
       }); // fine funzione monitoring
     
+      
+      //****** REALIZZARE UNA FUNZIONE CHE EFFETTUA LA MISURAZIONE COMANDATA DALL'UTENTE *******
+      //UNA FUNZIONE CHE SI ATTIVA SUL CLICK DI UN BOTTONE ED INVIA ALLA SERVLET IL VALORE DEL SENSORE CHE SI STA MONITORANDO
+      //IN MODO TALE CHE LA SERVLET INVII UNA RICHIESTA REST AD EDGEX PER EFFETTUARE UNA MISURAZIONE DEL NODO SENSORE
+      
+      //IL SENSORE CHE SI STA MONITORANDO LO CONOSCIAMO DAL MENù A TENDINA E SI PUò CHIEDERE LA MISURAZIONE SOLO DEL NODO CHE SI STA MONITORANDO
+      //SE VIENE CAMBIATA LA SCELTA NEL DROP MENù, SENZA AVVIARE MONITORING, NON SI DEVE COMANDARE LA MISURAZIONE MANUALE DEL NODO SENSORE
+      
+      //USARE UNA VARIABILE BOOLEANA CHE SIA TRUE SE IL MONITORAGGIO è AVVIATO, FALSE SE INVECE NON ANCORA è STATO AVVIATO IL MONITORING
+   
+      //UTILIZZARE LA VARIABILE sensorMonitoring PER ESSERE A CONOSCENZA DEL SENSORE CHE SI STA MONITORANDO
+      //IF(MONITORAGGIO AVVIATO)
+       //INVIO sensorMonitoring ALLA SERVLET CHE INVIA LA RICHIESTA AD EDGEX
+      
+     //FUNZIONE CLIC BOTTOM MONITORING SENSOR NODE
+      $('#buttonCommand').click(function () {
+    	   
+    	   	console.log("CLICK SU COMMAND");	        	
+   			
+	   		let sensorNodeid = $('#sensorNode').val();
+	       	console.log("SENSOR NODE ID: " + sensorNodeid);	         	
+
+			console.log("MONITORING: " +monitoring);
+	       	
+	       	//L'UTENTE NON HA SCELTO UN NODO SENSORE VALIDO O NON HA AVVIATO IL MONITORAGGIO DI UN SENSORE
+	       	if(!monitoring || sensorNodeid == "Select Sensor Node"){    		
+	       		//INSERIRE IL POPOUT DI ERRORE
+	       		console.log("devi avviare il monitoraggio di un sensore");
+	       			       		
+	       		let timerInterval
+	   			Swal.fire({
+	   				icon: 'error',
+	   			//  title: m,
+	   			    text: 'Devi scegliere un nodo sensore ed avviare il monitoraggio di un sensore',
+	   			    timer: 2000,
+	   				showConfirmButton: true, //non mostrare il tasto ok
+	     			    //confirmButtonText: 'Ho capito!'
+	   			    timerProgressBar: true,
+	   			    }).then((result) => {
+	   			    	if (result.dismiss === Swal.DismissReason.timer) {
+	   			        	console.log('I was closed by the timer')
+	   			        	//window.location.href = "sensorMonitoring.html";
+	   			      	}
+	   			    	else{
+	   			    		//window.location.href = "sensorMonitoring.html";
+	   			    	}
+	   			    })			    
+	       	}
+	       	else if(sensorNodeid != sensorNodeMonitoring){
+	       	//INSERIRE IL POPOUT DI ERRORE
+	       		console.log("SENSORmONITORING: " + sensorMonitoring);
+	       		console.log("SENSOR NODEID: " + sensorNodeid);
+	       	
+	       		console.log("Puoi richiedere di inviare un comando solo al nodo sensore che stai monitorando");
+	       		let timerInterval
+	   			Swal.fire({
+	   				icon: 'error',
+	   			//  title: m,
+	   			    text: 'Puoi richiedere di inviare un comando solo al nodo sensore che stai monitorando!',
+	   			    timer: 2000,
+	   				showConfirmButton: true, //non mostrare il tasto ok
+	     			    //confirmButtonText: 'Ho capito!'
+	   			    timerProgressBar: true,
+	   			    }).then((result) => {
+	   			    	if (result.dismiss === Swal.DismissReason.timer) {
+	   			        	console.log('I was closed by the timer')
+	   			        	//window.location.href = "sensorMonitoring.html";
+	   			      	}
+	   			    	else{
+	   			    		//window.location.href = "sensorMonitoring.html";
+	   			    	}
+	   			    })	
+	       	}
+	       	else{
+		       	
+				console.log("ENTRO NELL ELSE DI INVIO COMANDO");
+	       		
+				let data = {
+					idNodoSensore: sensorNodeid //INVIO L'ID DEL NODO SENSORE
+				}; 
+
+				console.log("sensornodeid: " + sensorNodeid );
+				
+			    $.ajax({
+			     	url: "ServletSendCommand",
+			        method: "GET",
+			        data: data,
+			        success: function (data, textStatus, jqXHR) {
+			                 console.log("DATA IN SENSOR: " + data);			                 
+			        },
+			        error: function (jqXHR, textStatus, errorThrown) {
+			        	 console.log("ERRORE " + textStatus + " " + errorThrown);
+			        	 
+			        },
+			        cache: false
+			     });
+		         
+	       	}
+			 
+	  });
+    
+       
+       
       
     </script>  
 

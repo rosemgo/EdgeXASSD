@@ -8,15 +8,21 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.Calendar;
 import java.util.Date;
 
+import org.json.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class SensorNodeREST extends SensorNode{
 
+	
+	//NON E' STATO REALIZZATO UN SERVIZIO REST CHE RISPONDA A COMANDI PROVENIENTE DA EDGEX, PERCHE' L'IMPLEMENTAZIONE DEL SERVIZIO RESTGO USATO IN EDGEX NON PREVEDE TALE FUNZIONALITA' (OSSIA L'INVIO DI UN COMANDO) (infatti nei deviceprofile presenti in restGO non ci sono comandi nella sezione commands)
+	
 	@Override
 	public void run() {
 		
@@ -57,8 +63,12 @@ public class SensorNodeREST extends SensorNode{
 			    	}
 			    	//separo la data in modo da non ripeterla per ogni sensore ma la inserisco nel messaggio una volta sola
 			    	JSONObject date = new JSONObject();
-			    	date.put("date", new Date());
-			    	jsonArray.put(date); //aggiungo la data solo una volta				    	
+				    //	date.put("date", new Date());
+			    	String timeStamp = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(Calendar.getInstance().getTime());
+				    System.out.println("DATA DELLA MISURAZIONE: " + timeStamp);
+				        
+				    date.put("date", timeStamp);
+				    jsonArray.put(date); //aggiungo la data solo una volta				    	
 			    	
 			    	for(int i=0; i<jsonArray.length(); i++) {
 			    		JSONObject j = jsonArray.getJSONObject(i);

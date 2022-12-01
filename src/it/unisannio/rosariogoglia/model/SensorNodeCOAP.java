@@ -2,7 +2,11 @@ package it.unisannio.rosariogoglia.model;
 
 import java.net.SocketException;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+
+import javax.servlet.ServletContext;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -53,7 +57,7 @@ public class SensorNodeCOAP extends SensorNode{
 				
 //		synchronized (SensorNodeCOAP.this.lock) {
 			
-			System.out.println("ENTRA UN THREAD ALLA VOLTA");
+		//	System.out.println("ENTRA UN THREAD ALLA VOLTA");
 			
 			System.out.println("INIZIO RUN IN CLIENT COAP: " + SensorNodeCOAP.this.device );
 			
@@ -66,7 +70,7 @@ public class SensorNodeCOAP extends SensorNode{
 				//USARE L'INDIRIZZIO coap://192.168.204.133/a1r/ PER EDGEX SULLA MACCHINA VIRTUALE LOCALE
 			 //	resource_uri = new CoapURI("coap://192.168.204.133/a1r/"+ SensorNodeCOAP.this.device +"/json");  //this.device DEVE CORRISPONDERE AL NOME DEL DISPOSITIVO CONTENUTO IN EDGEX	
 			 
-				//USARE L'INDIRIZZIO coap://15.160.35.22/a1r/ PER EDGEX SULLA CLOUD AWS
+				//USARE L'INDIRIZZIO coap://15.160.35.22/a1r/ PER EDGEX SUL CLOUD AWS
 				resource_uri = new CoapURI("coap://15.160.35.22/a1r/"+ SensorNodeCOAP.this.device +"/json");  //this.device DEVE CORRISPONDERE AL NOME DEL DISPOSITIVO CONTENUTO IN EDGEX	
 				 
 				
@@ -87,7 +91,7 @@ public class SensorNodeCOAP extends SensorNode{
 				
 					time2 = System.currentTimeMillis();
 				    
-				    if(time2 - time1 > 10000) {
+				    if(time2 - time1 > 30000) {
 						
 				    	//Creo jsonArray, ad ogni iterazione aggiungo il singolo jsonmsg nell'array. 
 				    	//Poi fuori dal for invoco una sola volta il publish ed invio un solo messaggio che contiene le misurazioni di tutti i sensori associati al nodo
@@ -112,15 +116,20 @@ public class SensorNodeCOAP extends SensorNode{
 				    	}
 				    	//separo la data in modo da non ripeterla per ogni sensore ma la inserisco nel messaggio una volta sola
 				    	JSONObject date = new JSONObject();
-				    	date.put("date", new Date());
-				    	jsonArray.put(date); //aggiungo la data solo una volta				    	
-				    	
+				    //	date.put("date", new Date());
+				    					    	
+				    	String timeStamp = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(Calendar.getInstance().getTime());
+				        System.out.println("DATA DELLA MISURAZIONE: " + timeStamp);
+				        
+				        date.put("date", timeStamp);
+				        jsonArray.put(date); //aggiungo la data solo una volta				    	
+				        
 				    	for(int i=0; i<jsonArray.length(); i++) {
 				    		JSONObject j = jsonArray.getJSONObject(i);
 				    		System.out.println("ELEMENTO " + i + " : "  + j.toString());
 				    	}
 				    	
-				    	CoapResponse resp=coap_client.request(CoapRequestMethod.POST, resource_uri, CoapResource.FORMAT_TEXT_PLAIN_UTF8, jsonArray.toString().getBytes());
+				    	CoapResponse resp = coap_client.request(CoapRequestMethod.POST, resource_uri, CoapResource.FORMAT_TEXT_PLAIN_UTF8, jsonArray.toString().getBytes());
 						//resp = coap_client.request(CoapRequestMethod.POST, resource_uri, 0, "751".getBytes());
 				    	
 								
@@ -198,6 +207,9 @@ public class SensorNodeCOAP extends SensorNode{
 							
 						if(req.getRequestUriPath().contains("json")) {
 							
+							System.out.println("RICHIESTA INVIO COMANDO SERVER COAP");
+							
+							
 							try {	
 								//Creo jsonArray, ad ogni aggiungo il singolo jsonmsg nell'array. 
 						    	//Poi fuori dal for invoco una sola volta il publish ed invio un solo messaggio che contiene le misurazioni di tutti i sensori associati al nodo
@@ -225,9 +237,14 @@ public class SensorNodeCOAP extends SensorNode{
 						    	
 						    	//separo la data in modo da non ripeterla per ogni sensore ma la inserisco nel messaggio una volta sola
 						    	JSONObject date = new JSONObject();
-						    	date.put("date", new Date());
-						    	jsonArray.put(date); //aggiungo la data solo una volta	
-						    	
+						    //	date.put("date", new Date());
+						    					    	
+						    	String timeStamp = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(Calendar.getInstance().getTime());
+						        System.out.println("DATA DELLA MISURAZIONE: " + timeStamp);
+						        
+						        date.put("date", timeStamp);
+						        jsonArray.put(date); //aggiungo la data solo una volta				    	
+												    	
 					    		//STAMPO IL CONTENUTO DEL MESSAGGIO			    	
 						    	for(int i=0; i<jsonArray.length(); i++) {
 						    		JSONObject j = jsonArray.getJSONObject(i);

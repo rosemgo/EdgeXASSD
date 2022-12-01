@@ -1,6 +1,8 @@
 package it.unisannio.rosariogoglia.model;
 
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -22,7 +24,7 @@ public class SensorNodeMQTT extends SensorNode{
 	
 public void run(){
 			
-	
+		//IL BROKER UTILIZZATO E' MOSQUITTO INTERNO AD EDGEX (COME MICROSERVIZIO)
 	//	String broker = "tcp://192.168.204.133:1883"; //USARE QUESTO INDIRIZZO PER EDGEX SU MACCHINA VIRTUALE LOCALE
 		String broker = "tcp://15.160.35.22:1883"; //USARE QUESTO INDIRIZZO PER EDGEX SU CLOUD AWS
 		String commandTopic = "command/"+ this.device +"/#"; //cambiare con CommandTopic   
@@ -45,9 +47,8 @@ public void run(){
 			System.out.println("Connected");
 		     			
 			
-//	while(!exitThread) { //VARIABILE BOLEANA USATA PER PROTEGGERE IL THREAD, SETTARE QUESTA VARIABILE A FALSE QUANDO SI VUOLE UCCIDERE IL THREAD, OVVIAMENTE IL METODO RUN NN SARà INTERROTTO SUBITO COME CON UN INTERRUPT.  
-		
-			sampleClient.setCallback(new MqttCallback() {
+			
+		sampleClient.setCallback(new MqttCallback() {
 		        
 	            @Override
 	            // Called when the client lost the connection to the broker
@@ -114,8 +115,13 @@ public void run(){
 				            	
 				            	//separo la data in modo da non ripeterla per ogni sensore ma la inserisco nel messaggio una volta sola
 						    	JSONObject date = new JSONObject();
-						    	date.put("date", new Date());
-						    	jsonArray.put(date); //aggiungo la data solo una volta	
+						    //	date.put("date", new Date());
+						    	String timeStamp = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(Calendar.getInstance().getTime());
+						        System.out.println("DATA DELLA MISURAZIONE: " + timeStamp);
+						    	
+						        date.put("date", timeStamp);
+						        
+						        jsonArray.put(date); //aggiungo la data solo una volta	
 				            	
 				            	jsonmsg.put("json", jsonArray.toString());
 				            								    
@@ -153,14 +159,18 @@ public void run(){
 			long time1 = System.currentTimeMillis();		
 			long time2 = 0;
 			String resource = "json"; //la risorsa inviata come evento async è sempre json
-						
+		
+	//******QUI VA PROTETTO IL THREAD*****		
+//			while(!exitThread) { //VARIABILE BOLEANA USATA PER PROTEGGERE IL THREAD, SETTARE QUESTA VARIABILE A FALSE QUANDO SI VUOLE UCCIDERE IL THREAD, OVVIAMENTE IL METODO RUN NN SARà INTERROTTO SUBITO COME CON UN INTERRUPT.  
+//			while(!Thread.interrupted()) {	//PROTEGGO IL THREAD DA UNA INTERRUZIONE IMPROVVISA
+
 			
 			//ogni 5 secondi invio un PONG sul topic DataTopic. Dal lato di EdgeX c'è il dispositivo MQTT-custom-device che è iscritto come broker al topic DataTopic
 			while(true) {
 				
 				time2 = System.currentTimeMillis();
 						    
-			    if(time2 - time1 > 10000) {
+			    if(time2 - time1 > 30000) {
 		    	
 			    	
 			    	//Creo jsonArray, ad ogni aggiungo il singolo jsonmsg nell'array. 
@@ -188,7 +198,11 @@ public void run(){
 			    	
 			    	//separo la data in modo da non ripeterla per ogni sensore ma la inserisco nel messaggio una volta sola
 			    	JSONObject date = new JSONObject();
-			    	date.put("date", new Date());
+//			    	date.put("date", new Date());
+			    	String timeStamp = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(Calendar.getInstance().getTime());
+			        System.out.println("DATA DELLA MISURAZIONE: " + timeStamp);
+			    	
+			        date.put("date", timeStamp);
 			    	jsonArray.put(date); //aggiungo la data solo una volta	
 			    	
 			    	for(int i=0; i<jsonArray.length(); i++) {
@@ -210,6 +224,7 @@ public void run(){
 			}	
 			
 	//}	
+    //    }
 		   
 		} catch (MqttSecurityException e) {
 			e.printStackTrace();

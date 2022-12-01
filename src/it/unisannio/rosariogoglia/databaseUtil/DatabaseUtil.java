@@ -32,10 +32,12 @@ public class DatabaseUtil {
 		 
 		 String jdbcDriver = "com.mysql.jdbc.Driver";
 	     //jdbc:driver://hostname:port/dbName?user=userName&password=password
-		 String hostname = hostnameMySqlRDSAmazon;
+		 String hostname = hostnameMySqlRDSAmazon; //hostnameMySqlRDSAmazon;
 	     String username = "admin";
 	     String password = "rosariomarcofrancesco";  //cambiare password per database su amazon AWS con quella dell' utente root di mysql server  
-	     String database = "sensoringdb";
+//		 String username = "root";
+//	     String password = "root"; 
+		 String database = "sensoringdb";
 	     String property = "?allowMultiQueries=true"; //consente di eseguire più query concatenate, mi serve per Resettare un Sensor Node nel metodo "updateSensorReset(Integer idSensorNode)" 
 		
 		//Carico il driver JDBC per la connessione con il database MySQL

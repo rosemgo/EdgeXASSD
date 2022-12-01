@@ -142,7 +142,7 @@ public class ServletCreateSensorNode extends HttpServlet {
 				//PASSARE LA PORTA DELLA COMPONENTE SERVER SEMPRE CRESCENTE, AD OGNI NODO CHE HA IL PROTOCOLLO COAP
 				Integer maxPort = snDAO.getMaxPortServerCOAP(); //ottengo il valore di porta più grande associato all'ultimo nodo sensore COAP inserito nel DB
 				Integer port;
-				if(maxPort == -1)
+				if(maxPort == -1 || maxPort == 0)
 					port = 45000;
 				else				
 					port = maxPort + 1; //creiamo una porta di uno più grande della massima presente 
@@ -172,8 +172,8 @@ public class ServletCreateSensorNode extends HttpServlet {
 				if(sensorNode.getProtocollo().getProtocol().equals("MQTT")) {
 					deviceEdgeX = "[{\"apiVersion\": \"v2\",\"device\": {\"name\": \""+ sensorNode.getDevice() +"\",\"description\": \"Sensor Node MQTT creato dall'utente in data: "+new Date()+"\",\"adminState\": \"UNLOCKED\",\"operatingState\": \"UP\",\"labels\": [\"mqtt\",\"utente\"],\"serviceName\": \"device-mqtt\",\"profileName\": \"Test-Device-MQTT-Profile\",\"protocols\": {\"mqtt\": {\"CommandTopic\": \"command/"+sensorNode.getDevice()+"\"}}}}]";
 				}
-				else if(sensorNode.getProtocollo().getProtocol().equals("COAP")){                                                           																																																																//15.160.103.223 USARE L'INDIRIZZO DELL'ISTANZA AMAZON AWS IN CUI E' DEPLOYATA L'APP JAVA (quindi il nodo sensore COAP)										
-					deviceEdgeX = "[{\"apiVersion\": \"v2\",\"device\": {\"name\": \""+ sensorNode.getDevice() +"\",\"description\": \"Sensor Node COAP creato dall'utente in data: "+new Date()+"\",\"adminState\": \"UNLOCKED\",\"operatingState\": \"UP\",\"labels\": [\"coap\",\"utente\"],\"serviceName\": \"device-coap\",\"profileName\": \"example-datatype\",\"protocols\": {\"COAP\": {\"ED_ADDR\": \"192.168.138.252\", \"ED_PORT\": \""+ ((SensorNodeCOAP) sensorNode).getPort() +"\",\"ED_SecurityMode\": \"NoSec\"}}}}]";
+				else if(sensorNode.getProtocollo().getProtocol().equals("COAP")){                                                           																																																																//15.160.103.226 USARE L'INDIRIZZO DELL'ISTANZA AMAZON AWS IN CUI E' DEPLOYATA L'APP, OSSIA DOVE SI TROVA IL NODO SENSORE JAVA (quindi il nodo sensore COAP)										
+					deviceEdgeX = "[{\"apiVersion\": \"v2\",\"device\": {\"name\": \""+ sensorNode.getDevice() +"\",\"description\": \"Sensor Node COAP creato dall'utente in data: "+new Date()+"\",\"adminState\": \"UNLOCKED\",\"operatingState\": \"UP\",\"labels\": [\"coap\",\"utente\"],\"serviceName\": \"device-coap\",\"profileName\": \"example-datatype\",\"protocols\": {\"COAP\": {\"ED_ADDR\": \"15.160.35.226 \", \"ED_PORT\": \""+ ((SensorNodeCOAP) sensorNode).getPort() +"\",\"ED_SecurityMode\": \"NoSec\"}}}}]";
 				}
 				else if(sensorNode.getProtocollo().getProtocol().equals("REST")){
 					deviceEdgeX = "[{\"apiVersion\": \"v2\",\"device\": {\"name\": \""+ sensorNode.getDevice() +"\",\"description\": \"Sensor Node REST creato dall'utente in data: "+new Date()+ "\",\"adminState\": \"UNLOCKED\",\"operatingState\": \"UP\",\"labels\": [\"rest\",\"utente\"],\"serviceName\": \"device-rest\",\"profileName\": \"sample-json\",\"protocols\": {\"other\": {}}}}]";
@@ -183,7 +183,7 @@ public class ServletCreateSensorNode extends HttpServlet {
 				
 				HttpClient client = HttpClient.newBuilder().build();
 				
-				//invio una richiesta REST al servizio metadata per aggiungere un device ad EdgeX
+				//invio una richiesta REST al servizio METADATA per aggiungere un device ad EdgeX
 				HttpRequest requestEdgeX = HttpRequest.newBuilder()  
 				      	.uri(URI.create("http://15.160.35.22:59881/api/v2/device")) //UTILIZZARE QUESTO INDIRIZZO (15.160.35.22) PER USARE EDGEX SU CLOUD AWS, UTILIZZARE 192.168.204.133 PER USARE EDGEX NELLA MACCHINA VIRTUALE LOCALE
 						.timeout(Duration.ofMinutes(2))
@@ -219,7 +219,7 @@ public class ServletCreateSensorNode extends HttpServlet {
 		*/	
 			
 	        
-	        String result = "{\"result\":"+resultF+",\"messaggio\":\"" +messaggio+ "\",\"redirect\":true,\"redirect_url\":\"dashboard.jsp\"}";
+	        String result = "{\"result\":"+resultF+",\"messaggio\":\"" +messaggio+ "\",\"redirect\":true,\"redirect_url\":\"dashboard.html\"}";
 			JSONObject m = null;
 			try {
 				 m = new JSONObject(result);
